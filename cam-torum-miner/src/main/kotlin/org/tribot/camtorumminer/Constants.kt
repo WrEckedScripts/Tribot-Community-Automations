@@ -9,6 +9,7 @@ val depositTileWest = WorldPoint(1500, 9542, 1)
 
 const val hammerId = 2347
 const val calcifiedDepositId = 29088
+const val blessedBoneShardsId = 29381
 
 val pickaxeIds = setOf(
     11920, // Dragon

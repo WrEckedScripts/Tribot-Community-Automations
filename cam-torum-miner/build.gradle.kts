@@ -20,5 +20,7 @@ tribot {
 }
 
 dependencies {
-    bundled(project(":community-commons"))
+    // nullable-lib wraps the automation-sdk with Kotlin-idiomatic helpers. `bundled`
+    // packages it into the script jar so it's available at runtime inside Tribot.
+    bundled("com.github.Nullable-TB:nullable-lib:latest.release")
 }

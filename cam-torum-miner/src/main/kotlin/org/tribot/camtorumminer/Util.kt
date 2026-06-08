@@ -1,111 +1,43 @@
 package org.tribot.camtorumminer
 
-import net.runelite.api.GameObject
-import net.runelite.api.Perspective
-import net.runelite.api.Player
-import net.runelite.api.TileObject
 import net.runelite.api.coords.WorldPoint
-import org.tribot.automation.script.core.CameraMethod
-import java.awt.Point
-import java.util.concurrent.ThreadLocalRandom
-import kotlin.random.Random
+import nullablelib.NullableLib
 
+/**
+ * The current server tick. nullable-lib does not wrap `tickCount`, so we read it off the
+ * thread-safe wrapped client directly. This is one of the few bare automation-sdk surfaces
+ * left in the script.
+ */
+val tickCount: Int get() = NullableLib.ctx.client.tickCount
 
+/**
+ * Walks to [destination] using the DentistWalker addon. nullable-lib does not wrap the addon
+ * walker, so this is the other remaining bare automation-sdk surface we touch.
+ */
+fun walkTo(destination: WorldPoint): Boolean =
+    NullableLib.ctx.addonLibraries.dentistWalker.walkTo(destination)
+
+/** Returns a random tile within [radius] tiles of [tile] (inclusive) on the same plane. */
 fun fuzzTile(tile: WorldPoint, radius: Int = 3): WorldPoint {
-    val x = uniform(tile.x - radius, tile.x + radius)
-    val y = uniform(tile.y - radius, tile.y + radius)
+    val x = (tile.x - radius..tile.x + radius).random()
+    val y = (tile.y - radius..tile.y + radius).random()
     return WorldPoint(x, y, tile.plane)
 }
 
-
-fun TileObject.name() = ctx.definitions.getObject(this.id)?.name ?: ""
-
-fun Player.getWorldLocationSafe() = clientThread { this.worldLocation }
-fun TileObject.getWorldLocationSafe() = clientThread { this.worldLocation }
-
-fun <T>clientThread(block: () -> T): T? {
-    var result: T? = null
-    ctx.clientThread.executeBlocking {
-        result = block()
-    }
-    return result
+/** Formats [ms] as an HH:MM:SS elapsed-time string for paint readouts. */
+fun formatDuration(ms: Long): String {
+    val totalSeconds = ms / 1000
+    val h = totalSeconds / 3600
+    val m = (totalSeconds % 3600) / 60
+    val s = totalSeconds % 60
+    return "%02d:%02d:%02d".format(h, m, s)
 }
 
-fun TileObject.isVisible(): Boolean = clientThread {
-    val pt = this.localLocation
-    val point = Perspective.localToCanvas(ctx.client, pt, this.worldLocation.plane) ?: return@clientThread false
-    ctx.screen.isPointInViewport(Point(point.x, point.y))
-} ?: false
-
-fun waitUntil(maxTicks: Int = 10, condition: () -> Boolean): Boolean {
-    var ticks = 0
-    var conditionMet = false
-    val listener = ctx.events.onGameTick {
-        ticks++
-        if (ticks >= maxTicks) {
-            return@onGameTick
-        }
-        if (condition()) {
-            conditionMet = true
-            return@onGameTick
-        }
-    }
-
-    try {
-        while (!conditionMet && ticks < maxTicks) {
-            ctx.waiting.sleep(10)
-        }
-        return conditionMet
-    } finally {
-        listener.remove()
-    }
+/** Projects [count] accumulated over [elapsedMs] to a whole-number per-hour rate. */
+fun perHour(count: Int, elapsedMs: Long): Int {
+    if (elapsedMs <= 0) return 0
+    return (count * 3_600_000.0 / elapsedMs).toInt()
 }
 
-fun openBank(): Boolean {
-    val player = ctx.client.localPlayer ?: return false
-    val playerLocation = player.getWorldLocationSafe() ?: return false
-    val bankObj = ctx.worldViews.getTopLevelObjects()
-        .filter {
-            val def = ctx.definitions.getObject(it.id) ?: return@filter false
-            def.actions.contains("Bank")
-        }
-        .minByOrNull { it.getWorldLocationSafe()?.distanceTo(playerLocation) ?: Int.MAX_VALUE } ?: return false
-
-    if (!bankObj.isVisible()) {
-        val loc = bankObj.getWorldLocationSafe() ?: return false
-        ctx.camera.turnTo(loc, CameraMethod.MOUSE)
-        ctx.waiting.sleep(uniform(0, 200).toLong())
-    }
-
-    ctx.interaction.click(bankObj, "Bank")
-    return waitUntil { ctx.banking.isOpen() }
-}
-
-
-// Random util
-
-private fun rng() = ThreadLocalRandom.current()
-
-fun randomSD(mean: Int, sd: Int): Int {
-    return (mean + (rng().nextGaussian() * sd)).toInt()
-}
-
-fun randomSD(mean: Double, sd: Double): Double {
-    return (mean + (rng().nextGaussian() * sd))
-}
-
-fun randomSD(min: Int, max: Int, mean: Int, sd: Int): Int {
-    var random = randomSD(mean, sd)
-    while (random < min || random > max) {
-        random = randomSD(mean, sd)
-    }
-    return random
-}
-
-fun uniform(min: Int, max: Int): Int {
-    return rng().nextInt(min, max)
-}
-
-fun uniform(min: Double, max: Double): Double {
-    return rng().nextDouble() * (max - min) + min
-}
+/** Formats [n] with thousands separators for paint readouts (e.g. 12345 -> "12,345"). */
+fun formatNumber(n: Int): String = "%,d".format(n)
