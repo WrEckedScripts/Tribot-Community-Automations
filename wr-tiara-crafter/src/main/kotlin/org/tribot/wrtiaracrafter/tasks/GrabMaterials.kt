@@ -16,6 +16,7 @@ import org.tribot.wrtiaracrafter.contracts.TaskContract
 import org.tribot.wrtiaracrafter.data.Altars
 import org.tribot.wrtiaracrafter.data.Banks
 import org.tribot.wrtiaracrafter.hud.TaskLabelTracker
+import kotlin.time.Duration
 import org.tribot.script.sdk.input.Mouse as SdkMouse
 
 class GrabMaterials(val altar: Altars) : TaskContract {
@@ -98,7 +99,8 @@ class GrabMaterials(val altar: Altars) : TaskContract {
                 .minus(TribotRandom.uniform(0, 1000))
                 .toLong()
 
-            TaskLabelTracker.label = "Sleeping for $sleepTime ms"
+            TaskLabelTracker.label = "Leaving screen"
+
             Lottery.execute(0.15..0.33) {
                 SdkMouse.leaveScreen()
             }
