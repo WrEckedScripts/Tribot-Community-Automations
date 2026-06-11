@@ -1,10 +1,12 @@
 package org.tribot.wrtiaracrafter.tasks
 
 import nullablelib.NullableLib.ctx
-import nullablelib.antiban.sleepColdReaction
+import nullablelib.antiban.sleepClickReaction
 import nullablelib.core.input.click
 import nullablelib.core.query.TileObjects
 import nullablelib.core.tabs.Inventory
+import org.tribot.script.sdk.util.TribotRandom
+import org.tribot.script.sdk.Waiting as SdkWaiting
 import org.tribot.wrtiaracrafter.contracts.TaskContract
 import org.tribot.wrtiaracrafter.data.Altars
 
@@ -14,6 +16,11 @@ class CraftTiara(private val altar: Altars) : TaskContract {
 
     override fun execute(): Boolean {
         updateActiveTask()
+
+        if (!waitUntilPlayerStopsMoving()) {
+            ctx.logger.info("Player did not stop moving before crafting; retrying")
+            return false
+        }
 
         if (
             Inventory.getCount(altar.talismanId) == 0 ||
@@ -30,8 +37,21 @@ class CraftTiara(private val altar: Altars) : TaskContract {
         } ?: return false
         altarObject.click("Use")
 
-        sleepColdReaction()
+        sleepClickReaction()
 
         return true
+    }
+
+    private fun waitUntilPlayerStopsMoving(): Boolean {
+        val player = ctx.client.localPlayer ?: return false
+        if (player.poseAnimation == player.idlePoseAnimation) {
+            return true
+        }
+
+        return SdkWaiting.waitUntil(3_500, TribotRandom.uniform(450, 1_250)) {
+            val currentPlayer = ctx.client.localPlayer
+                ?: return@waitUntil false
+            currentPlayer.poseAnimation == currentPlayer.idlePoseAnimation
+        }
     }
 }

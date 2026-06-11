@@ -2,6 +2,7 @@ package org.tribot.wrtiaracrafter.tasks
 
 import nullablelib.NullableLib
 import nullablelib.antiban.sleepColdReaction
+import nullablelib.antiban.sleepHotReaction
 import nullablelib.core.definition.Definitions
 import nullablelib.core.tabs.Inventory
 import nullablelib.core.widgets.Banking
@@ -52,6 +53,8 @@ class GrabMaterials(val altar: Altars) : TaskContract {
             )
         }
 
+        sleepColdReaction()
+
         if (Inventory.getCount(altar.tiaraId) < 14) {
             Banking.withdraw(
                 altar.tiaraId,
@@ -59,7 +62,7 @@ class GrabMaterials(val altar: Altars) : TaskContract {
             )
         }
 
-        sleepColdReaction()
+        sleepHotReaction()
 
         val hasCraftablePair =
             Inventory.getCount(altar.talismanId) > 0 &&
