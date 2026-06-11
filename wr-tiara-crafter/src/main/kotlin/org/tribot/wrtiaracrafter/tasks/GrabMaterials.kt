@@ -1,15 +1,22 @@
 package org.tribot.wrtiaracrafter.tasks
 
 import nullablelib.NullableLib
+import nullablelib.NullableLib.ctx
 import nullablelib.antiban.sleepColdReaction
 import nullablelib.antiban.sleepHotReaction
 import nullablelib.core.definition.Definitions
 import nullablelib.core.tabs.Inventory
 import nullablelib.core.widgets.Banking
+import nullablelib.flow.BailException
+import nullablelib.flow.bail
 import org.tribot.community.commons.BankingHelpers
+import org.tribot.community.commons.randomization.Lottery
+import org.tribot.script.sdk.util.TribotRandom
 import org.tribot.wrtiaracrafter.contracts.TaskContract
 import org.tribot.wrtiaracrafter.data.Altars
 import org.tribot.wrtiaracrafter.data.Banks
+import org.tribot.wrtiaracrafter.hud.TaskLabelTracker
+import org.tribot.script.sdk.input.Mouse as SdkMouse
 
 class GrabMaterials(val altar: Altars) : TaskContract {
     override val name: String
@@ -35,6 +42,8 @@ class GrabMaterials(val altar: Altars) : TaskContract {
             return false
         }
 
+        randomizeBreak()
+
         BankingHelpers.depositAllExcept(
             Definitions.item(altar.tiaraId)?.name ?: "",
             Definitions.item(altar.talismanId)?.name ?: "",
@@ -46,20 +55,20 @@ class GrabMaterials(val altar: Altars) : TaskContract {
             return false
         }
 
-        if (Inventory.getCount(altar.talismanId) < 14) {
-            Banking.withdraw(
-                altar.talismanId,
-                talismanCount.coerceAtMost(14),
-            )
-        }
+        when (TribotRandom.uniform(0, 8) <= 3) {
+            true -> {
+                NullableLib.ctx.logger.error("Rolled true case")
+                withdrawIfMissing(altar.talismanId)
+                sleepColdReaction()
+                withdrawIfMissing(altar.tiaraId)
+            }
 
-        sleepColdReaction()
-
-        if (Inventory.getCount(altar.tiaraId) < 14) {
-            Banking.withdraw(
-                altar.tiaraId,
-                tiaraCount.coerceAtMost(14),
-            )
+            else -> {
+                NullableLib.ctx.logger.error("Rolled else case")
+                withdrawIfMissing(altar.tiaraId)
+                sleepColdReaction()
+                withdrawIfMissing(altar.talismanId)
+            }
         }
 
         sleepHotReaction()
@@ -69,10 +78,47 @@ class GrabMaterials(val altar: Altars) : TaskContract {
                     Inventory.getCount(altar.tiaraId) > 0
 
         if (hasCraftablePair) {
-            NullableLib.ctx.logger.info("Grabbed materials")
+            ctx.logger.info("Grabbed materials")
             Banking.close()
         }
 
         return hasCraftablePair
+    }
+
+    /**
+     * Randomly sleeps for a short period of time,
+     * with a random 15% to 33% chance of leaving the screen, whilst sleeping
+     */
+    private fun randomizeBreak() {
+        var tookBreak = false
+
+        Lottery.execute(0.02..0.07) {
+            val sleepTime = TribotRandom
+                .uniform(7_500, 20_000)
+                .minus(TribotRandom.uniform(0, 1000))
+                .toLong()
+
+            TaskLabelTracker.label = "Sleeping for $sleepTime ms"
+            Lottery.execute(0.15..0.33) {
+                SdkMouse.leaveScreen()
+            }
+
+            ctx.waiting.sleep(sleepTime)
+            tookBreak = true
+        }
+
+        if (tookBreak) {
+            bail("Took a break")
+        }
+    }
+
+    private fun withdrawIfMissing(itemId: Int) {
+        val count = Banking.getCount(itemId)
+        if (Inventory.getCount(itemId) < 14) {
+            Banking.withdraw(
+                itemId,
+                count.coerceAtMost(14),
+            )
+        }
     }
 }

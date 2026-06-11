@@ -2,6 +2,7 @@ package org.tribot.wrtiaracrafter.tasks
 
 import net.runelite.api.coords.WorldPoint
 import org.tribot.automation.script.ScriptContext
+import org.tribot.automation.script.addon.dentistwalker.WalkerConfig
 import org.tribot.automation.script.addon.dentistwalker.WalkingCondition
 import org.tribot.wrtiaracrafter.contracts.TaskContract
 

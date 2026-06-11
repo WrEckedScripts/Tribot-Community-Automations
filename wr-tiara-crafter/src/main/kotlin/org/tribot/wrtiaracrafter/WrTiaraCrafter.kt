@@ -5,6 +5,7 @@ import nullablelib.antiban.sleepHotReaction
 import nullablelib.flow.BailException
 import org.tribot.automation.TribotScript
 import org.tribot.automation.script.ScriptContext
+import org.tribot.community.commons.randomization.Lottery
 import org.tribot.wrtiaracrafter.data.Altars
 import org.tribot.wrtiaracrafter.tasks.CraftTiara
 import org.tribot.wrtiaracrafter.tasks.EnsureLoggedInTask
@@ -16,7 +17,6 @@ class WrTiaraCrafter : TribotScript {
 
     override fun execute(context: ScriptContext) {
         setup(context)
-        TiaraHud().install()
 
         val altar = Altars.AIR_ALTAR
         val stageResolver = TiaraStageResolver(context, altar)
@@ -62,5 +62,7 @@ class WrTiaraCrafter : TribotScript {
 
     private fun setup(context: ScriptContext) {
         NullableLib.init(context)
+        TiaraHud().install()
+        Lottery.configure(context, true)
     }
 }
