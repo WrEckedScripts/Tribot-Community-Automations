@@ -2,6 +2,7 @@ package org.tribot.wrtiaracrafter
 
 import nullablelib.NullableLib
 import nullablelib.antiban.sleepHotReaction
+import nullablelib.flow.BailException
 import org.tribot.automation.TribotScript
 import org.tribot.automation.script.ScriptContext
 import org.tribot.wrtiaracrafter.data.Altars
@@ -15,6 +16,7 @@ class WrTiaraCrafter : TribotScript {
 
     override fun execute(context: ScriptContext) {
         setup(context)
+        TiaraHud().install()
 
         val altar = Altars.AIR_ALTAR
         val stageResolver = TiaraStageResolver(context, altar)
@@ -27,22 +29,26 @@ class WrTiaraCrafter : TribotScript {
 
         try {
             while (true) {
-                val stage = stageResolver.resolve()
-                if (stage != previousStage) {
-                    context.logger.info("Tiara stage: $stage")
-                    previousStage = stage
-                }
-
-                when (stage) {
-                    TiaraStage.LOGIN -> ensureLoggedIn.execute()
-                    TiaraStage.BANK -> grabMaterials.execute()
-                    TiaraStage.TRAVEL_TO_ALTAR -> enterRuin.execute()
-                    TiaraStage.CRAFT_TIARAS -> craftTiara.execute()
-                    TiaraStage.EXIT_ALTAR -> leaveRuin.execute()
-                    TiaraStage.OUT_OF_MATERIALS -> {
-                        context.logger.info("Out of tiaras or talismans. Stopping script.")
-                        return
+                try {
+                    val stage = stageResolver.resolve()
+                    if (stage != previousStage) {
+                        context.logger.info("Tiara stage: $stage")
+                        previousStage = stage
                     }
+
+                    when (stage) {
+                        TiaraStage.LOGIN -> ensureLoggedIn.execute()
+                        TiaraStage.BANK -> grabMaterials.execute()
+                        TiaraStage.TRAVEL_TO_ALTAR -> enterRuin.execute()
+                        TiaraStage.CRAFT_TIARAS -> craftTiara.execute()
+                        TiaraStage.EXIT_ALTAR -> leaveRuin.execute()
+                        TiaraStage.OUT_OF_MATERIALS -> {
+                            context.logger.info("Out of tiaras or talismans. Stopping script.")
+                            return
+                        }
+                    }
+                } catch (e: BailException) {
+                    context.logger.info("Action failed: ${e.message}. Retrying next loop.")
                 }
 
                 sleepHotReaction()

@@ -21,12 +21,13 @@ class CraftTiara(private val altar: Altars) : TaskContract {
             return false
         }
 
+        Inventory.clickItem(altar.talismanId, "Use")
+
         val altarObject = altar.objectIds.firstNotNullOfOrNull { objectId ->
             TileObjects.closestWithId(objectId)
         } ?: return false
-
-        Inventory.clickItem(altar.talismanId, "Use")
         altarObject.click("Use")
+
         sleepColdReaction()
 
         return true

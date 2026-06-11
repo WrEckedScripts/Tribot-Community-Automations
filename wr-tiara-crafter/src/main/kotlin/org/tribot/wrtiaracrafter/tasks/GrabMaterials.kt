@@ -43,21 +43,26 @@ class GrabMaterials(val altar: Altars) : TaskContract {
             return false
         }
 
-        Banking.withdraw(
-            altar.talismanId,
-            talismanCount.coerceAtMost(14),
-        )
+        if (Inventory.getCount(altar.talismanId) == 0) {
+            Banking.withdraw(
+                altar.talismanId,
+                talismanCount.coerceAtMost(14),
+            )
+        }
 
-        Banking.withdraw(
-            altar.tiaraId,
-            tiaraCount.coerceAtMost(14),
-        )
+        if (Inventory.getCount(altar.tiaraId) == 0) {
+            Banking.withdraw(
+                altar.tiaraId,
+                tiaraCount.coerceAtMost(14),
+            )
+        }
 
         sleepColdReaction()
 
         val hasCraftablePair =
             Inventory.getCount(altar.talismanId) > 0 &&
-                Inventory.getCount(altar.tiaraId) > 0
+                    Inventory.getCount(altar.tiaraId) > 0
+
         if (hasCraftablePair) {
             NullableLib.ctx.logger.info("Grabbed materials")
             Banking.close()
