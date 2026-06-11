@@ -12,6 +12,7 @@ import nullablelib.flow.bail
 import org.tribot.community.commons.BankingHelpers
 import org.tribot.community.commons.randomization.Lottery
 import org.tribot.script.sdk.util.TribotRandom
+import org.tribot.wrtiaracrafter.antiban.BreaksHelper
 import org.tribot.wrtiaracrafter.contracts.TaskContract
 import org.tribot.wrtiaracrafter.data.Altars
 import org.tribot.wrtiaracrafter.data.Banks
@@ -43,7 +44,13 @@ class GrabMaterials(val altar: Altars) : TaskContract {
             return false
         }
 
-        randomizeBreak()
+        BreaksHelper.afkBreak(
+            probabilityRange = 0.02..0.07,
+            sleepTime = TribotRandom.uniform(7_500, 20_000)
+                .minus(TribotRandom.uniform(0, 1000))
+                .toLong(),
+            alwaysLeaveScreen = true,
+        )
 
         BankingHelpers.depositAllExcept(
             Definitions.item(altar.tiaraId)?.name ?: "",
@@ -58,14 +65,14 @@ class GrabMaterials(val altar: Altars) : TaskContract {
 
         when (TribotRandom.uniform(0, 8) <= 3) {
             true -> {
-                NullableLib.ctx.logger.error("Rolled true case")
+                ctx.logger.error("Rolled true case")
                 withdrawIfMissing(altar.talismanId)
                 sleepColdReaction()
                 withdrawIfMissing(altar.tiaraId)
             }
 
             else -> {
-                NullableLib.ctx.logger.error("Rolled else case")
+                ctx.logger.error("Rolled else case")
                 withdrawIfMissing(altar.tiaraId)
                 sleepColdReaction()
                 withdrawIfMissing(altar.talismanId)
@@ -84,34 +91,6 @@ class GrabMaterials(val altar: Altars) : TaskContract {
         }
 
         return hasCraftablePair
-    }
-
-    /**
-     * Randomly sleeps for a short period of time,
-     * with a random 15% to 33% chance of leaving the screen, whilst sleeping
-     */
-    private fun randomizeBreak() {
-        var tookBreak = false
-
-        Lottery.execute(0.02..0.07) {
-            val sleepTime = TribotRandom
-                .uniform(7_500, 20_000)
-                .minus(TribotRandom.uniform(0, 1000))
-                .toLong()
-
-            TaskLabelTracker.label = "Leaving screen"
-
-            Lottery.execute(0.15..0.33) {
-                SdkMouse.leaveScreen()
-            }
-
-            ctx.waiting.sleep(sleepTime)
-            tookBreak = true
-        }
-
-        if (tookBreak) {
-            bail("Took a break")
-        }
     }
 
     private fun withdrawIfMissing(itemId: Int) {

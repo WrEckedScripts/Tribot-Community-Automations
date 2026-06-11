@@ -12,6 +12,7 @@ import org.tribot.script.sdk.Waiting as SdkWaiting
 import org.tribot.wrtiaracrafter.contracts.TaskContract
 import org.tribot.wrtiaracrafter.data.Altars
 import org.tribot.community.commons.randomization.Lottery
+import org.tribot.wrtiaracrafter.antiban.BreaksHelper
 import org.tribot.script.sdk.input.Mouse as SdkMouse
 import org.tribot.wrtiaracrafter.hud.TaskLabelTracker
 
@@ -34,6 +35,10 @@ class CraftTiara(private val altar: Altars) : TaskContract {
             ctx.logger.info("Missing a talisman or tiara before crafting")
             return false
         }
+
+        BreaksHelper.afkBreak(
+            probabilityRange = 0.02..0.06
+        )
 
         Inventory.clickItem(altar.talismanId, "Use")
 
@@ -58,24 +63,5 @@ class CraftTiara(private val altar: Altars) : TaskContract {
                 ?: return@waitUntil false
             currentPlayer.poseAnimation == currentPlayer.idlePoseAnimation
         }
-    }
-
-    private fun randomizeOffScreen() {
-        var tookBreak = false
-        Lottery.execute(TribotRandom.uniform(0.01, 0.03)..TribotRandom.uniform(0.04, 0.06)) {
-            TaskLabelTracker.label = "Leaving screen"
-
-            if (SdkMouse.isOnScreen()) {
-                SdkMouse.leaveScreen()
-            }
-
-            sleepIdleWakeup()
-            tookBreak = true
-        }
-
-        if (tookBreak) {
-            bail("Took a break")
-        }
-
     }
 }
