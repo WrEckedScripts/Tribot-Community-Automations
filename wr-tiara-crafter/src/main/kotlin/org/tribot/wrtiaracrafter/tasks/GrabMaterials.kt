@@ -43,14 +43,14 @@ class GrabMaterials(val altar: Altars) : TaskContract {
             return false
         }
 
-        if (Inventory.getCount(altar.talismanId) == 0) {
+        if (Inventory.getCount(altar.talismanId) < 14) {
             Banking.withdraw(
                 altar.talismanId,
                 talismanCount.coerceAtMost(14),
             )
         }
 
-        if (Inventory.getCount(altar.tiaraId) == 0) {
+        if (Inventory.getCount(altar.tiaraId) < 14) {
             Banking.withdraw(
                 altar.tiaraId,
                 tiaraCount.coerceAtMost(14),
