@@ -21,6 +21,8 @@ class MoveToLocation(
     }
 
     override fun execute(): Boolean {
+        updateActiveTask()
+
         if (isAtLocation()) {
             ctx.logger.info("Already at $location")
             return true

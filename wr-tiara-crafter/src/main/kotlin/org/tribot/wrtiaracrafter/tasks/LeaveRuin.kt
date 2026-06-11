@@ -15,6 +15,8 @@ class LeaveRuin(private val altar: Altars) : TaskContract {
         get() = "Leave ruin"
 
     override fun execute(): Boolean {
+        updateActiveTask()
+
         val clicked = TileObjects.closestMatching {
             Definitions.getObject(it.id)?.actions?.contains("Use") ?: false
         }?.click("Use")

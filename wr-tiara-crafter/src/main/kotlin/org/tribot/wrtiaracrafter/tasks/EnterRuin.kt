@@ -14,6 +14,8 @@ class EnterRuin(private val altar: Altars) : TaskContract {
         get() = "Enter ruin"
 
     override fun execute(): Boolean {
+        updateActiveTask()
+
         val playerLocation = ctx.client.localPlayer?.worldLocation ?: return false
         if (altar.entryLocation.distanceTo(playerLocation) > 10) {
             MoveToLocation(ctx, altar.entryLocation, arrivalRadius = 10).execute()

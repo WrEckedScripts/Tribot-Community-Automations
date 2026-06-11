@@ -11,6 +11,7 @@ import nullablelib.paint.Draw
 import nullablelib.paint.Paint
 import nullablelib.paint.PaintLayer
 import org.tribot.automation.script.event.EventOverride
+import org.tribot.wrtiaracrafter.hud.TaskLabelTracker
 import java.awt.Desktop
 import java.awt.Graphics2D
 import java.awt.Rectangle
@@ -28,7 +29,7 @@ private const val AVATAR_RESOURCE = "/wrecked-avatar.png"
 private const val HUD_X = 8
 private const val HUD_Y = 8
 private const val HUD_WIDTH = 300
-private const val HUD_HEIGHT = 100
+private const val HUD_HEIGHT = 110
 private const val PADDING = 10
 private const val HEADER_HEIGHT = 26
 private const val ACCENT_HEIGHT = 2
@@ -124,6 +125,8 @@ class TiaraHud : PaintLayer {
 
         var rowY = bounds.y + PADDING + HEADER_HEIGHT + ACCENT_HEIGHT + 4 + 12
         drawRow(g, rowY, "Runtime", formatDuration(System.currentTimeMillis() - scriptStart))
+        rowY += ROW_HEIGHT
+        drawRow(g, rowY, "Task", TaskLabelTracker.label)
         rowY += ROW_HEIGHT
         drawRow(g, rowY, "Experience", experienceText())
         rowY += ROW_HEIGHT

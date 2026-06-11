@@ -13,6 +13,8 @@ class CraftTiara(private val altar: Altars) : TaskContract {
         get() = "Craft tiara"
 
     override fun execute(): Boolean {
+        updateActiveTask()
+
         if (
             Inventory.getCount(altar.talismanId) == 0 ||
             Inventory.getCount(altar.tiaraId) == 0
