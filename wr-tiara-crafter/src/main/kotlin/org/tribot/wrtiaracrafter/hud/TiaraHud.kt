@@ -64,8 +64,12 @@ class TiaraHud : PaintLayer {
     @Volatile
     private var supportButtonHovered = false
 
+    @Volatile
+    private var lastMouseWasBot: Boolean? = null
+
     private var mouseGestureActive = false
     private var mouseGestureStartedInside = false
+    private var mouseGestureIsPhysical = false
     private var mouseGestureDragged = false
     private var nextClickOverride: EventOverride? = null
 
@@ -76,7 +80,14 @@ class TiaraHud : PaintLayer {
 
         val paintRegistration = Paint.add(this)
         val mouseOverrideRegistration = Events.overrideMouseEvents(::handleMouseEvent)
+        val mouseMoveRegistration = Events.onMouseMove { _, isBot ->
+            lastMouseWasBot = isBot
+        }
+        val mouseDragRegistration = Events.onMouseDrag { _, _, isBot ->
+            lastMouseWasBot = isBot
+        }
         val mouseClickRegistration = Events.onMouseClick { point, button, isBot ->
+            lastMouseWasBot = isBot
             if (
                 !isBot &&
                 button == MouseEvent.BUTTON1 &&
@@ -89,6 +100,8 @@ class TiaraHud : PaintLayer {
         Events.onScriptEnding {
             paintRegistration.close()
             mouseOverrideRegistration.close()
+            mouseMoveRegistration.close()
+            mouseDragRegistration.close()
             mouseClickRegistration.close()
         }
     }
@@ -175,9 +188,14 @@ class TiaraHud : PaintLayer {
         val insideButton = supportButtonBounds().contains(point)
         supportButtonHovered = insideButton
 
+        if (event.id == MouseEvent.MOUSE_MOVED) {
+            return EventOverride.SEND
+        }
+
         if (event.id == MouseEvent.MOUSE_PRESSED) {
             mouseGestureActive = true
             mouseGestureStartedInside = insideHud
+            mouseGestureIsPhysical = lastMouseWasBot == false
             mouseGestureDragged = false
             return gestureOverride()
         }
@@ -198,7 +216,11 @@ class TiaraHud : PaintLayer {
             val override = nextClickOverride
             nextClickOverride = null
             return override ?: if (insideHud) {
-                EventOverride.DISMISS
+                if (lastMouseWasBot == false) {
+                    EventOverride.DISMISS
+                } else {
+                    EventOverride.SEND
+                }
             } else {
                 EventOverride.SEND
             }
@@ -208,11 +230,11 @@ class TiaraHud : PaintLayer {
             return gestureOverride()
         }
 
-        return if (insideHud) EventOverride.DISMISS else EventOverride.SEND
+        return EventOverride.SEND
     }
 
     private fun gestureOverride(): EventOverride =
-        if (mouseGestureStartedInside) {
+        if (mouseGestureStartedInside && mouseGestureIsPhysical) {
             EventOverride.DISMISS
         } else {
             EventOverride.SEND
