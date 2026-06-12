@@ -4,10 +4,10 @@ import nullablelib.NullableLib.ctx
 import nullablelib.antiban.sleepHotReaction
 import nullablelib.core.query.TileObjects
 import nullablelib.core.tabs.Inventory
-import org.tribot.script.sdk.Waiting as SdkWaiting
-import org.tribot.script.sdk.util.Retry as SdkRetry
 import org.tribot.wrtiaracrafter.contracts.TaskContract
 import org.tribot.wrtiaracrafter.data.Altars
+import org.tribot.script.sdk.Waiting as SdkWaiting
+import org.tribot.script.sdk.util.Retry as SdkRetry
 
 class EnterRuin(private val altar: Altars) : TaskContract {
     override val name: String
@@ -20,19 +20,19 @@ class EnterRuin(private val altar: Altars) : TaskContract {
             return false
         }
 
-        // Query inventory for random talisman
         val talisman = Inventory.getItems().firstOrNull { it.id == altar.talismanId }
         if (talisman == null) {
             ctx.logger.info("No talisman found in inventory")
             return false
         }
 
+        val altarObject = TileObjects.closestWithId(
+            *altar.objectIds.toIntArray(),
+            source = playerLocation,
+            maxDistance = 15,
+        ) ?: return false
+
         Inventory.clickItem(talisman.id, "Use")
-
-        val altarObject = altar.objectIds.firstNotNullOfOrNull { objectId ->
-            TileObjects.closestWithId(objectId)
-        } ?: return false
-
         val clicked = SdkRetry.retry(3) {
             if (ctx.interaction.click(altarObject, "Use")) {
                 true

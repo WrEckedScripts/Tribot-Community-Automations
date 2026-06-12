@@ -13,7 +13,7 @@ tribot {
             scriptName = "WrTiaraCrafter"
             version = "1.0.0"
             author = "WrEcked"
-            description = ""
+            description = "Crafts air tiara's to train Runecrafting"
             category = "runecrafting"
         }
     }

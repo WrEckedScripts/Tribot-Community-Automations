@@ -2,16 +2,14 @@ package org.tribot.wrtiaracrafter.tasks
 
 import nullablelib.NullableLib.ctx
 import nullablelib.antiban.sleepColdReaction
-import nullablelib.antiban.sleepIdleWakeup
 import nullablelib.core.input.click
 import nullablelib.core.query.TileObjects
 import nullablelib.core.tabs.Inventory
-import nullablelib.flow.bail
 import org.tribot.script.sdk.util.TribotRandom
-import org.tribot.script.sdk.Waiting as SdkWaiting
+import org.tribot.wrtiaracrafter.antiban.BreaksHelper
 import org.tribot.wrtiaracrafter.contracts.TaskContract
 import org.tribot.wrtiaracrafter.data.Altars
-import org.tribot.wrtiaracrafter.antiban.BreaksHelper
+import org.tribot.script.sdk.Waiting as SdkWaiting
 
 class CraftTiara(private val altar: Altars) : TaskContract {
     override val name: String
@@ -35,11 +33,14 @@ class CraftTiara(private val altar: Altars) : TaskContract {
             probabilityRange = 0.02..0.06
         )
 
-        Inventory.clickItem(altar.talismanId, "Use")
+        val playerLocation = ctx.client.localPlayer?.worldLocation ?: return false
+        val altarObject = TileObjects.closestWithId(
+            *altar.objectIds.toIntArray(),
+            source = playerLocation,
+            maxDistance = 15,
+        ) ?: return false
 
-        val altarObject = altar.objectIds.firstNotNullOfOrNull { objectId ->
-            TileObjects.closestWithId(objectId)
-        } ?: return false
+        Inventory.clickItem(altar.talismanId, "Use")
         altarObject.click("Use")
 
         sleepColdReaction()

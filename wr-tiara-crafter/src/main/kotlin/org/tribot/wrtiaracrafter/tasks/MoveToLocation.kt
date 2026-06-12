@@ -27,11 +27,9 @@ class MoveToLocation(
             return true
         }
 
-        val targetTile = fuzzTile(location)
+        ctx.logger.info("Walking to $location")
 
-        ctx.logger.info("Walking to $targetTile")
-
-        ctx.addonLibraries.dentistWalker.walkTo(targetTile, {
+        val walkSucceeded = ctx.addonLibraries.dentistWalker.walkTo(location, {
             PlayerEnergyHelper.enable()
 
             if (isAtLocation()) {
@@ -41,14 +39,16 @@ class MoveToLocation(
             return@walkTo WalkingCondition.State.CONTINUE
         })
 
-        ctx.logger.info("Walked to $targetTile")
+        val arrived = isAtLocation()
+        if (!walkSucceeded || !arrived) {
+            ctx.logger.warn(
+                "Failed to reach $location within $arrivalRadius tiles " +
+                        "(walkerSucceeded=$walkSucceeded, arrived=$arrived)"
+            )
+            return false
+        }
 
-        return isAtLocation()
-    }
-
-    private fun fuzzTile(tile: WorldPoint, radius: Int = 4): WorldPoint {
-        val x = (tile.x - radius..tile.x + radius).random()
-        val y = (tile.y - radius..tile.y + radius).random()
-        return WorldPoint(x, y, tile.plane)
+        ctx.logger.info("Reached $location")
+        return true
     }
 }
