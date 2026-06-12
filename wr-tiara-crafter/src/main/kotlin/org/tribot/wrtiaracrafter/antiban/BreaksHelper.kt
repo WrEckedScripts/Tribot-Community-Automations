@@ -4,8 +4,8 @@ import nullablelib.NullableLib.ctx
 import nullablelib.antiban.sleepIdleWakeup
 import nullablelib.flow.bail
 import org.tribot.community.commons.randomization.Lottery
-import org.tribot.script.sdk.input.Mouse as SdkMouse
 import org.tribot.script.sdk.util.TribotRandom
+import org.tribot.script.sdk.input.Mouse as SdkMouse
 import org.tribot.wrtiaracrafter.hud.TaskLabelTracker
 
 object BreaksHelper {
@@ -15,17 +15,16 @@ object BreaksHelper {
         alwaysLeaveScreen: Boolean = false,
     ) {
         var tookBreak = false
-        Lottery.execute(
-            TribotRandom.uniform(
-                probabilityRange.start.toInt(), probabilityRange.endInclusive.toInt()
-            ).toDouble()
-        ) {
+        Lottery.execute(probabilityRange) {
             TaskLabelTracker.label = "Leaving screen"
 
             if (alwaysLeaveScreen) {
                 SdkMouse.leaveScreen()
             } else {
-                Lottery.execute(0.15..0.33) {
+                val lowEnd = TribotRandom.uniform(0.11, 0.15)
+                val highEnd = TribotRandom.uniform(0.33, 0.37)
+
+                Lottery.execute(lowEnd..highEnd) {
                     SdkMouse.leaveScreen()
                 }
             }
