@@ -1,5 +1,6 @@
 package org.tribot.wrtiaracrafter
 
+import net.runelite.api.Skill
 import nullablelib.NullableLib
 import nullablelib.antiban.sleepHotReaction
 import nullablelib.flow.BailException
@@ -7,8 +8,13 @@ import org.tribot.automation.TribotScript
 import org.tribot.automation.script.ScriptContext
 import org.tribot.community.commons.playerstate.PlayerEnergyHelper
 import org.tribot.community.commons.randomization.Lottery
+import org.tribot.wrscript.utilities.hud.WrScriptHud
+import org.tribot.wrscript.utilities.tasks.EnsureLoggedInTask
 import org.tribot.wrtiaracrafter.data.Altars
-import org.tribot.wrtiaracrafter.tasks.*
+import org.tribot.wrtiaracrafter.tasks.CraftTiara
+import org.tribot.wrtiaracrafter.tasks.EnterRuin
+import org.tribot.wrtiaracrafter.tasks.GrabMaterials
+import org.tribot.wrtiaracrafter.tasks.LeaveRuin
 
 class WrTiaraCrafter : TribotScript {
 
@@ -61,7 +67,7 @@ class WrTiaraCrafter : TribotScript {
         val isDebugMode = context.runtime.scriptArgs.lowercase().contains("debug")
 
         NullableLib.init(context)
-        TiaraHud().install()
+        WrScriptHud("WrTiaraCrafter", Skill.RUNECRAFT).install()
 
         Lottery.configure(context, loggingEnabled = isDebugMode)
         PlayerEnergyHelper.configure(context, loggingEnabled = isDebugMode)

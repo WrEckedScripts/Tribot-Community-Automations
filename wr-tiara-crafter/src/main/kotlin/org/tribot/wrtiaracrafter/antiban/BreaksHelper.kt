@@ -5,8 +5,8 @@ import nullablelib.antiban.sleepIdleWakeup
 import nullablelib.flow.bail
 import org.tribot.community.commons.randomization.Lottery
 import org.tribot.script.sdk.util.TribotRandom
+import org.tribot.wrscript.utilities.hud.TaskLabelTracker
 import org.tribot.script.sdk.input.Mouse as SdkMouse
-import org.tribot.wrtiaracrafter.hud.TaskLabelTracker
 
 object BreaksHelper {
     fun afkBreak(

@@ -4,7 +4,7 @@ import net.runelite.api.coords.WorldPoint
 import org.tribot.automation.script.ScriptContext
 import org.tribot.automation.script.addon.dentistwalker.WalkingCondition
 import org.tribot.community.commons.playerstate.PlayerEnergyHelper
-import org.tribot.wrtiaracrafter.contracts.TaskContract
+import org.tribot.wrscript.utilities.tasks.TaskContract
 
 class MoveToLocation(
     private val ctx: ScriptContext,

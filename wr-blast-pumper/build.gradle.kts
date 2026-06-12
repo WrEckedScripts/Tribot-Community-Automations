@@ -8,19 +8,23 @@ tribot {
     useJavaFx = false
 
     scripts {
-        register("wrtiaracrafter") {
-            className = "org.tribot.wrtiaracrafter.WrTiaraCrafter"
-            scriptName = "WrTiaraCrafter"
+        register("wrblastpumper") {
+            className = "org.tribot.wrblastpumper.WrBlastPumper"
+            scriptName = "WrBlastPumper"
             version = "1.0.0"
             author = "WrEcked"
-            description = "Crafts air tiara's to train Runecrafting"
-            category = "runecrafting"
+            description = "Operates the Blast Furnace pump for AFK Strength experience"
+            category = "strength"
         }
     }
 }
 
 dependencies {
-    bundled(project(":community-commons"))
     bundled(project(":wrscript-utilities"))
     bundled("com.github.Nullable-TB:nullable-lib:latest.release")
+    testImplementation(kotlin("test"))
+}
+
+tasks.test {
+    useJUnitPlatform()
 }

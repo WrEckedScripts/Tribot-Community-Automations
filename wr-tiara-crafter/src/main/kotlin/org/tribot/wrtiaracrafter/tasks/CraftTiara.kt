@@ -6,8 +6,8 @@ import nullablelib.core.input.interact
 import nullablelib.core.query.TileObjects
 import nullablelib.core.tabs.Inventory
 import org.tribot.script.sdk.util.TribotRandom
+import org.tribot.wrscript.utilities.tasks.TaskContract
 import org.tribot.wrtiaracrafter.antiban.BreaksHelper
-import org.tribot.wrtiaracrafter.contracts.TaskContract
 import org.tribot.wrtiaracrafter.data.Altars
 import org.tribot.script.sdk.Waiting as SdkWaiting
 
