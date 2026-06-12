@@ -1,29 +1,30 @@
 package org.tribot.camtorumminer
 
 import net.runelite.api.coords.WorldPoint
+import net.runelite.api.gameval.ItemID
 
 val bankTile = WorldPoint(1451, 9568, 1)
 val anvilTile = WorldPoint(1448, 9582, 1)
 val depositTileEast = WorldPoint(1517, 9541, 1)
 val depositTileWest = WorldPoint(1500, 9542, 1)
 
-const val hammerId = 2347
-const val calcifiedDepositId = 29088
-const val blessedBoneShardsId = 29381
+const val hammerId = ItemID.HAMMER
+const val calcifiedDepositId = ItemID.CALCIFIED_DEPOSIT
+const val blessedBoneShardsId = ItemID.BLESSED_BONE_SHARD
 
 val pickaxeIds = setOf(
-    11920, // Dragon
-    23677,
-    25376,
-    30351,
-    12797,
-    20014, // Third Age (lmao)
-    1265, // Bronze
-    1267, // Iron
-    1269, // Steel
-    12297, // Black
-    1271, // Adamant
-    1273, // Mithril
-    1275, // Rune
+    ItemID.DRAGON_PICKAXE,
+    ItemID.ZALCANO_PICKAXE,
+    ItemID.TRAILBLAZER_PICKAXE_NO_INFERNAL,
+    ItemID.TRAILBLAZER_RELOADED_PICKAXE_NO_INFERNAL,
+    ItemID.DRAGON_PICKAXE_PRETTY,
+    ItemID._3A_PICKAXE, // (lmao)
+    ItemID.BRONZE_PICKAXE,
+    ItemID.IRON_PICKAXE,
+    ItemID.STEEL_PICKAXE,
+    ItemID.BLACK_PICKAXE,
+    ItemID.ADAMANT_PICKAXE,
+    ItemID.MITHRIL_PICKAXE,
+    ItemID.RUNE_PICKAXE,
 )
 

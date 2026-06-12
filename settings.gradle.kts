@@ -39,7 +39,8 @@ include("community-commons")
 include("example-automation-plugin")
 include("cam-torum-miner")
 
-// Community scripts
+// Community Scripts
+include("player-mover")
 include("wr-tiara-crafter")
 
 // NOTE to contributors: add your own module here. See CONTRIBUTING.md for the full
