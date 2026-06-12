@@ -16,7 +16,7 @@ object BreaksHelper {
     ) {
         var tookBreak = false
         Lottery.execute(probabilityRange) {
-            TaskLabelTracker.label = "Leaving screen"
+            TaskLabelTracker.label = "Taking a break"
 
             if (alwaysLeaveScreen) {
                 SdkMouse.leaveScreen()
