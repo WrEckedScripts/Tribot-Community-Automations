@@ -12,7 +12,7 @@ class EnsureLoggedInTask(private val ctx: ScriptContext) : TaskContract {
     override val name: String
         get() = "Ensure logged in"
 
-    override fun execute(): Boolean {
+    override fun perform(): Boolean {
         if (ctx.login.isLoggedIn() && ctx.client.localPlayer != null) return true
 
         return SdkWaiting.waitUntil(15_000) {

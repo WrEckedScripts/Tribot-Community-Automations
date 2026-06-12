@@ -23,9 +23,7 @@ class MoveToLocation(
         return location.distanceTo(playerLocation) <= arrivalRadius
     }
 
-    override fun execute(): Boolean {
-        updateActiveTask()
-
+    override fun perform(): Boolean {
         if (isAtLocation()) {
             ctx.logger.info("Already at $location")
             return true

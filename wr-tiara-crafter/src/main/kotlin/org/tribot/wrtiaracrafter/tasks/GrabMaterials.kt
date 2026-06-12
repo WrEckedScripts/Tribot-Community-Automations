@@ -24,9 +24,7 @@ class GrabMaterials(val altar: Altars) : TaskContract {
     override val name: String
         get() = "Banking at Falador West bank"
 
-    override fun execute(): Boolean {
-        updateActiveTask()
-
+    override fun perform(): Boolean {
         val playerLocation = NullableLib.ctx.client.localPlayer?.worldLocation ?: return false
 
         // Ensure we're near Falador west bank.

@@ -11,18 +11,13 @@ import org.tribot.script.sdk.util.TribotRandom
 import org.tribot.script.sdk.Waiting as SdkWaiting
 import org.tribot.wrtiaracrafter.contracts.TaskContract
 import org.tribot.wrtiaracrafter.data.Altars
-import org.tribot.community.commons.randomization.Lottery
 import org.tribot.wrtiaracrafter.antiban.BreaksHelper
-import org.tribot.script.sdk.input.Mouse as SdkMouse
-import org.tribot.wrtiaracrafter.hud.TaskLabelTracker
 
 class CraftTiara(private val altar: Altars) : TaskContract {
     override val name: String
         get() = "Craft tiara"
 
-    override fun execute(): Boolean {
-        updateActiveTask()
-
+    override fun perform(): Boolean {
         if (!waitUntilPlayerStopsMoving()) {
             ctx.logger.info("Player did not stop moving before crafting; retrying")
             return false
