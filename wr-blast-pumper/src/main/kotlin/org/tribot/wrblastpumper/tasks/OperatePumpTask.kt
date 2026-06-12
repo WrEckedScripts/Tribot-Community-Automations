@@ -1,6 +1,7 @@
 package org.tribot.wrblastpumper.tasks
 
 import nullablelib.NullableLib.ctx
+import nullablelib.core.definition.Definitions
 import nullablelib.core.query.TileObjects
 import org.tribot.script.sdk.Waiting
 import org.tribot.script.sdk.input.Mouse
@@ -14,6 +15,12 @@ class OperatePumpTask : TaskContract {
         val pumpData = BlastFurnaceObject.PUMP
         val pump = TileObjects.closestWithId(pumpData.objectId)
             ?: return false
+
+        // Operate action seems to ditch sometimes, no clue why yet.
+        Definitions.getObject(pump.id)?.actions?.forEach {
+            ctx.logger.info("Action: $it")
+        }
+        if (false == Definitions.getObject(pump.id)?.actions?.contains(pumpData.action)) return false
 
         if (!ctx.interaction.interact(pump, pumpData.action)) {
             return false

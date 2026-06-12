@@ -6,4 +6,6 @@ data class PumperState(
     val isPumpNearby: Boolean = false,
     val isPumping: Boolean = false,
     val isRefreshDue: Boolean = false,
+    val isStoveRefillableNearby: Boolean = false,
+    val isRefuelDue: Boolean = false,
 )
