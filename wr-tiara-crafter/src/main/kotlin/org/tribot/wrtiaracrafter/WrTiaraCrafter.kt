@@ -44,7 +44,7 @@ class WrTiaraCrafter : TribotScript {
                         TiaraStage.EXIT_ALTAR -> leaveRuin.execute()
                         TiaraStage.OUT_OF_MATERIALS -> {
                             context.logger.info("Out of tiaras or talismans. Stopping script.")
-                            return
+                            throw Exception("Out of materials")
                         }
                     }
                 } catch (e: BailException) {
