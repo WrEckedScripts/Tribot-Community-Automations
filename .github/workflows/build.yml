@@ -30,8 +30,10 @@ jobs:
           key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
           restore-keys: ${{ runner.os }}-gradle-
 
+      # Since Gradle 8 the root build no longer runs buildSrc tests, so the release
+      # pipeline's wire-format tests must be invoked explicitly to gate CI.
       - name: Build everything
-        run: ./gradlew build --no-daemon --stacktrace
+        run: ./gradlew :buildSrc:test build --no-daemon --stacktrace
 
       - name: Upload fat JARs
         uses: actions/upload-artifact@v4

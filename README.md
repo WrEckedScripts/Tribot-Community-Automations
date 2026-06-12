@@ -81,6 +81,67 @@ The short version:
 
 ---
 
+## Releasing to the website
+
+Merged scripts are published to the Tribot website by a nightly GitHub Action
+([`release.yml`](./.github/workflows/release.yml), 06:00 UTC). A module opts in by
+adding a `tribot-script.json` file to its root:
+
+```json
+{
+  "name": "Cam Torum Miner",
+  "description": "Mines blessed bone shards and banks",
+  "categories": ["Mining"],
+  "version": "1.0.0",
+  "isCommunity": true,
+  "scriptId": 123
+}
+```
+
+- **`name`** (required): the script's display name on the website. Used to find the
+  existing script: the backend lists the author's scripts with a partial name match,
+  and the pipeline picks the exact match client-side. Renaming the manifest therefore
+  creates a new script instead of updating the old one, so don't rename casually.
+- **`description`** (required): shown on the website.
+- **`categories`** (required): non-empty array. Allowed values: Agility, Combat,
+  Construction, Cooking, Crafting, Farming, Firemaking, Fishing, Fletching, Herblore,
+  Hunter, Magic, Minigames, Mining, Money Making, Prayer, Questing, Runecrafting,
+  Slayer, Smithing, Thieving, Tools, Woodcutting.
+- **`version`** (required): at most 15 characters. **Bump this to release new
+  source**; the nightly run only uploads when the manifest version differs from the
+  version already on the website, so unchanged scripts are skipped.
+- **`isCommunity`** (optional): defaults to `true`.
+- **`scriptId`** (optional): target an existing website script by id instead of by
+  name lookup.
+
+For each manifest module, the pipeline builds the source zip (the dev plugin's
+`zipSources` task), creates the script on the website if it doesn't exist yet, syncs
+name/description/categories/isCommunity when they differ, and uploads the zip when
+the version changed, waiting for the backend to finish processing it. Modules are
+released independently; one failure doesn't block the others.
+
+Run it locally or trigger it manually:
+
+```bash
+# Validate every manifest and build the zips without touching the API
+./gradlew releaseScripts -PreleaseDryRun=true
+
+# Restrict to one module
+./gradlew releaseScripts -PreleaseOnly=cam-torum-miner
+```
+
+The workflow can also be triggered from the Actions tab (`workflow_dispatch`) with an
+optional `module` input and a `dry_run` checkbox. A real (non-dry) run needs these
+environment variables, provided in CI by repo secrets of the same names:
+
+- `TRIBOT_API_BASE_URL`: backend base URL
+- `TRIBOT_API_KEY`: API key whose owner has the Admin role; the pipeline talks only
+  to the admin endpoints (sent as-is, never logged)
+- `TRIBOT_AUTHOR_USER_ID`: user id the scripts are created under and resolved
+  against; it does not need to be the API key owner
+
+---
+
 ## Using the shared library
 
 The `community-commons` module holds helpers that make sense across many scripts.

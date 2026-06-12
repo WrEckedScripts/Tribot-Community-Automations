@@ -1,0 +1,6 @@
+{
+  "name": "WrTiaraCrafter",
+  "description": "Trains Runecrafting by crafting air tiaras. Withdraws blank tiaras and air talismans from the bank, runs to the Air Altar ruin, crafts, and repeats until materials run out, taking human-like breaks and showing progress on an in-game HUD. Built and maintained by the Tribot Community and open source at https://github.com/TribotRS/Tribot-Community-Automations/tree/main/wr-tiara-crafter",
+  "categories": ["Runecrafting"],
+  "version": "1.0.0"
+}
