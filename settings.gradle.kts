@@ -41,6 +41,7 @@ include("cam-torum-miner")
 
 // Community Scripts
 include("player-mover")
+include("wr-tiara-crafter")
 
 // NOTE to contributors: add your own module here. See CONTRIBUTING.md for the full
 // walkthrough, but the short version is:
