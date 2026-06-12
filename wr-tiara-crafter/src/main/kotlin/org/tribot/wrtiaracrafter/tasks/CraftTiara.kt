@@ -2,7 +2,7 @@ package org.tribot.wrtiaracrafter.tasks
 
 import nullablelib.NullableLib.ctx
 import nullablelib.antiban.sleepColdReaction
-import nullablelib.core.input.click
+import nullablelib.core.input.interact
 import nullablelib.core.query.TileObjects
 import nullablelib.core.tabs.Inventory
 import org.tribot.script.sdk.util.TribotRandom
@@ -41,7 +41,7 @@ class CraftTiara(private val altar: Altars) : TaskContract {
         ) ?: return false
 
         Inventory.clickItem(altar.talismanId, "Use")
-        altarObject.click("Use")
+        altarObject.interact("Use")
 
         sleepColdReaction()
 
