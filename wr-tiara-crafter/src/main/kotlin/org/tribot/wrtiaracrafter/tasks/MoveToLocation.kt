@@ -1,11 +1,9 @@
 package org.tribot.wrtiaracrafter.tasks
 
 import net.runelite.api.coords.WorldPoint
-import net.runelite.api.gameval.InterfaceID
-import net.runelite.api.gameval.VarPlayerID
 import org.tribot.automation.script.ScriptContext
 import org.tribot.automation.script.addon.dentistwalker.WalkingCondition
-import org.tribot.script.sdk.util.TribotRandom
+import org.tribot.community.commons.playerstate.PlayerEnergyHelper
 import org.tribot.wrtiaracrafter.contracts.TaskContract
 
 class MoveToLocation(
@@ -34,16 +32,7 @@ class MoveToLocation(
         ctx.logger.info("Walking to $targetTile")
 
         ctx.addonLibraries.dentistWalker.walkTo(targetTile, {
-            // Randomly enable running
-            if ((ctx.client.energy / 100) >= TribotRandom.uniform(44, 63) && ctx.client.getVarpValue(VarPlayerID.OPTION_RUN) != 1) {
-                ctx.logger.debug("Toggling run at ${ctx.client.energy}")
-                val toggle = ctx.client.getWidget(InterfaceID.Orbs.RUNBUTTON)
-                    ?: return@walkTo WalkingCondition.State.CONTINUE
-
-                if (!ctx.interaction.click(toggle)) {
-                    return@walkTo WalkingCondition.State.CONTINUE
-                }
-            }
+            PlayerEnergyHelper.enable()
 
             if (isAtLocation()) {
                 return@walkTo WalkingCondition.State.SUCCESS

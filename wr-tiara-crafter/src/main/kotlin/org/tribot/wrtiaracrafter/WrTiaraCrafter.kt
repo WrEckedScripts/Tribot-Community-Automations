@@ -5,13 +5,10 @@ import nullablelib.antiban.sleepHotReaction
 import nullablelib.flow.BailException
 import org.tribot.automation.TribotScript
 import org.tribot.automation.script.ScriptContext
+import org.tribot.community.commons.playerstate.PlayerEnergyHelper
 import org.tribot.community.commons.randomization.Lottery
 import org.tribot.wrtiaracrafter.data.Altars
-import org.tribot.wrtiaracrafter.tasks.CraftTiara
-import org.tribot.wrtiaracrafter.tasks.EnsureLoggedInTask
-import org.tribot.wrtiaracrafter.tasks.EnterRuin
-import org.tribot.wrtiaracrafter.tasks.GrabMaterials
-import org.tribot.wrtiaracrafter.tasks.LeaveRuin
+import org.tribot.wrtiaracrafter.tasks.*
 
 class WrTiaraCrafter : TribotScript {
 
@@ -55,14 +52,20 @@ class WrTiaraCrafter : TribotScript {
             }
         } catch (e: Exception) {
             context.logger.error("Error occurred: ${e.message}", e)
-            context.logger.info("Stopped WrTiaraCrafter, thanks for using it!")
+            context.logger.info("WrTiaraCrafter stopped, thanks for using it!")
             context.logger.info("If you have any feedback, please reach out on our Discord: https://discord.gg/Ju64CcbykJ")
         }
     }
 
     private fun setup(context: ScriptContext) {
+        val isDebugMode = context.runtime.scriptArgs.lowercase().contains("debug")
+
         NullableLib.init(context)
         TiaraHud().install()
-        Lottery.configure(context, true)
+
+        Lottery.configure(context, loggingEnabled = isDebugMode)
+        PlayerEnergyHelper.configure(context, loggingEnabled = isDebugMode)
+
+        context.logger.info("WrTiaraCrafter started!")
     }
 }
