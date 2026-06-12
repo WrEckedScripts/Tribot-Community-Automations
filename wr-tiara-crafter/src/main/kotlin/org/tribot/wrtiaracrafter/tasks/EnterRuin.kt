@@ -34,7 +34,7 @@ class EnterRuin(private val altar: Altars) : TaskContract {
 
         Inventory.clickItem(talisman.id, "Use")
         val clicked = SdkRetry.retry(3) {
-            if (ctx.interaction.click(altarObject, "Use")) {
+            if (ctx.interaction.interact(altarObject, "Use")) {
                 true
             } else {
                 sleepHotReaction()
