@@ -28,6 +28,9 @@ jobs:
   release:
     # Forks inherit the schedule but must never publish (and lack the secrets anyway).
     if: github.repository == 'TribotRS/Tribot-Community-Automations'
+    # The API credentials live in this environment, not in repo-level secrets, so
+    # they are only exposed to jobs that declare it and can be branch-restricted.
+    environment: Release
     runs-on: ubuntu-latest
     # Each module can poll a source update for up to 10 minutes, so several
     # releasing modules in one run need far more headroom than a single one.

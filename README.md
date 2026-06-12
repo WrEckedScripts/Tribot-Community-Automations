@@ -132,7 +132,8 @@ Run it locally or trigger it manually:
 
 The workflow can also be triggered from the Actions tab (`workflow_dispatch`) with an
 optional `module` input and a `dry_run` checkbox. A real (non-dry) run needs these
-environment variables, provided in CI by repo secrets of the same names:
+environment variables, provided in CI by secrets of the same names in the repo's
+"Release" GitHub environment:
 
 - `TRIBOT_API_BASE_URL`: backend base URL
 - `TRIBOT_API_KEY`: API key whose owner has the Admin role; the pipeline talks only
