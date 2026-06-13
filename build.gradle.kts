@@ -34,6 +34,7 @@ allprojects {
     apply(plugin = "idea")
     apply(plugin = "kotlin")
     repositories {
+        google()
         mavenCentral()
         maven("https://repo.runelite.net")
         maven("https://jitpack.io")

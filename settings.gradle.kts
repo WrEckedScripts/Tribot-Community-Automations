@@ -43,6 +43,8 @@ include("cam-torum-miner")
 include("player-mover")
 include("wr-tiara-crafter")
 
+include("tut-island")
+
 // NOTE to contributors: add your own module here. See CONTRIBUTING.md for the full
 // walkthrough, but the short version is:
 //   1. Create a directory at the repo root: `my-awesome-script/`
