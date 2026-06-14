@@ -19,6 +19,10 @@ class SelectIronmanMode: Task {
     override fun canRun(): Boolean {
         val desiredAccountType = desiredAccountType() ?: return false
 
+        if (isPinSetupPromptOpen() || AutomationSdk.getContext().pinScreen.isOpen()) {
+            return true
+        }
+
         return isSetupVisible() && MyPlayer.getAccountType() != desiredAccountType
     }
 
@@ -64,9 +68,7 @@ class SelectIronmanMode: Task {
         }
 
         if (pinSetup) {
-            Log.info("[TutIsland] Bank PIN setup prompt open; clicking Proceed.")
             if (!clickWidget(289, 8, 8, action = "Proceed")) {
-                Log.warn("[TutIsland] Failed to click bank PIN setup Proceed.")
                 return true
             }
 
@@ -75,7 +77,7 @@ class SelectIronmanMode: Task {
             }
         }
 
-//        enterPin(pinScreen)
+        enterPin(pinScreen)
         return true
     }
 
@@ -99,17 +101,9 @@ class SelectIronmanMode: Task {
             return false
         }
 
-        Log.info("[TutIsland] Bank PIN screen open; entering PIN.")
-        if (!pinScreen.enterPin()) {
-            Log.warn("[TutIsland] Failed to enter bank PIN.")
-            return false
-        }
+        pinScreen.enterPin()
 
-        Waiting.waitUntil(TutPreferences.longDelayMs()) {
-            !pinScreen.isOpen()
-        }
-
-        return true
+        return !pinScreen.isOpen()
     }
 
     private fun desiredAccountType(): MyPlayer.AccountType? =

@@ -17,6 +17,8 @@ import org.tribot.tutisland.tasks.bank.*
 import org.tribot.tutisland.tasks.brotherbrace.*
 import org.tribot.tutisland.tasks.combatinstructor.*
 import org.tribot.tutisland.tasks.gielinorguide.*
+import org.tribot.tutisland.tasks.ironmantutor.SelectIronmanMode
+import org.tribot.tutisland.tasks.ironmantutor.TalkToIronmanTutor
 import org.tribot.tutisland.tasks.magicinstructor.*
 import org.tribot.tutisland.tasks.masterchef.*
 import org.tribot.tutisland.tasks.mininginstructor.*
@@ -102,9 +104,9 @@ class TutIsland: TribotScript {
         OpenPrayer(),
         LeaveBrotherBrace(),
 
-        // Ironman Mode disabled until bank PIN handling is reliable.
-        // TalkToIronmanTutor(),
-        // SelectIronmanMode(),
+        // Ironman Mode
+        TalkToIronmanTutor(),
+        SelectIronmanMode(),
 
         // Magic Guide
         TalkToMagicInstructor(),
@@ -139,6 +141,8 @@ class TutIsland: TribotScript {
             Log.info("[TutIsland] Logging in...")
             Waiting.wait(1000)
         }
+
+        disablePinHandlerSidecar()
 
         val startTimeMs = System.currentTimeMillis()
         lastMoveMs = startTimeMs
@@ -192,6 +196,15 @@ class TutIsland: TribotScript {
         }
 
         Log.info("[TutIsland] Script finished.")
+    }
+
+    private fun disablePinHandlerSidecar() {
+        val pinHandler = AutomationSdk.getContext().sidecars.bankPinHandler
+
+        if (pinHandler.isEnabled) {
+            pinHandler.isEnabled = false
+            Log.info("[TutIsland] Disabled Tribot pin handler.")
+        }
     }
 
     private fun loadArgs(args: String, store: ProfileStore): Boolean {

@@ -82,9 +82,7 @@ private fun TutIslandGuiContent(
     val profiles = remember { mutableStateListOf<String>().apply { addAll(store.listProfiles()) } }
 
     fun syncSettings() {
-        // Settings.ironmanMode = ironmanMode
-
-        Settings.ironmanMode = IronmanMode.STANDARD
+        Settings.ironmanMode = ironmanMode
         Settings.walkLocation = endLocation
     }
 
@@ -135,14 +133,14 @@ private fun TutIslandGuiContent(
                             verticalAlignment = Alignment.Bottom,
                             modifier = Modifier.fillMaxWidth()
                         ) {
-//                            DropdownField(
-//                                label = "Account Type",
-//                                value = ironmanMode,
-//                                options = IronmanMode.entries,
-//                                itemLabel = { it.displayName },
-//                                onSelected = { ironmanMode = it },
-//                                modifier = Modifier.weight(1f)
-//                            )
+                            DropdownField(
+                                label = "Account Type",
+                                value = ironmanMode,
+                                options = IronmanMode.entries,
+                                itemLabel = { it.displayName },
+                                onSelected = { ironmanMode = it },
+                                modifier = Modifier.weight(1f)
+                            )
 
                             DropdownField(
                                 label = "End Location",
@@ -167,7 +165,7 @@ private fun TutIslandGuiContent(
                                         val loaded = store.load(name)
                                         if (loaded != null) {
                                             Settings.fromSerializable(loaded)
-                                            Settings.ironmanMode = IronmanMode.STANDARD
+                                            ironmanMode = Settings.ironmanMode
                                             endLocation = Settings.walkLocation
                                             profileMessage = "Loaded $name"
                                             Log.info("[TutIsland] Loaded profile \"$name\"")

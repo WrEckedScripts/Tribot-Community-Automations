@@ -44,8 +44,8 @@ class LightFire : Task {
 
             if (source.click("Use") && Waiting.waitUntil(TutPreferences.mediumDelayMs()) { GameState.isAnyItemSelected() }) {
                 target.click()
-                Waiting.waitUntil(TutPreferences.longDelayMs()) {
-                    Inventory.getCount(ItemID.NEWBIELOGS) == 0
+                Waiting.waitUntil(TutPreferences.longDelayMs() * 3) {
+                    GameState.getSetting(281) == 90
                 }
             }
         }
