@@ -37,6 +37,7 @@ class CastSpellOnChicken: Task {
             castConfirmed = Waiting.waitUntil(TutPreferences.mediumDelayMs()) {
                 isCastConfirmed(chicken, initialHealthPercent)
             }
+            Waiting.waitUniform(TutPreferences.mediumDelayMs(), TutPreferences.longDelayMs())
         }
     }
 

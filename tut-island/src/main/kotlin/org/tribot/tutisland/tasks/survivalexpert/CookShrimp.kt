@@ -27,7 +27,7 @@ class CookShrimp: Task {
 
         if (shrimp.click("Use") && Waiting.waitUntil(TutPreferences.mediumDelayMs()) { GameState.isAnyItemSelected() }) {
             fire.interact("Use")
-            Waiting.waitUntil(TutPreferences.longDelayMs()) {
+            Waiting.waitUntil(TutPreferences.longDelayMs() * 2) {
                 Inventory.getCount(ItemID.NEWBIERAW_SHRIMP) == 0
             }
         }

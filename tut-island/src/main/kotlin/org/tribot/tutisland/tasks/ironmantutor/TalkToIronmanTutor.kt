@@ -1,6 +1,7 @@
 package org.tribot.tutisland.tasks.ironmantutor
 
 import org.tribot.script.sdk.ChatScreen
+import org.tribot.script.sdk.AutomationSdk
 import org.tribot.script.sdk.GameState
 import org.tribot.script.sdk.MyPlayer
 import org.tribot.script.sdk.Waiting
@@ -23,6 +24,7 @@ class TalkToIronmanTutor: Task {
         return MyPlayer.getAccountType() != desiredAccountType &&
                 GameState.getSetting(281) == 620 &&
                 ironmanSetupClosed &&
+                !handlingBankPin() &&
                 !ChatScreen.isClickContinueOpen()
     }
 
@@ -83,6 +85,10 @@ class TalkToIronmanTutor: Task {
 
         return ChatScreen.selectOption(option)
     }
+
+    private fun handlingBankPin(): Boolean =
+        AutomationSdk.getContext().pinScreen.isOpen() ||
+            Query.widgets().textContains("Would you like to set a PIN").isAny
 
     private fun desiredAccountType(): MyPlayer.AccountType? =
         when (Settings.ironmanMode) {
