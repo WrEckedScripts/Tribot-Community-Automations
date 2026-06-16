@@ -52,6 +52,7 @@ object GUI {
             ) {
                 TutIslandGuiContent(
                     store = store,
+                    initialProfileName = saveAsProfileName,
                     onStart = {
                         store.save(saveAsProfileName, Settings.toSerializable())
 
@@ -71,12 +72,13 @@ object GUI {
 @Composable
 private fun TutIslandGuiContent(
     store: ProfileStore,
+    initialProfileName: String,
     onStart: () -> Unit
 ) {
     var ironmanMode by remember { mutableStateOf(Settings.ironmanMode) }
     var endLocation by remember { mutableStateOf(Settings.walkLocation) }
-    var selectedProfile by remember { mutableStateOf(store.listProfiles().firstOrNull() ?: "default") }
-    var saveProfileName by remember { mutableStateOf("default") }
+    var selectedProfile by remember { mutableStateOf(initialProfileName) }
+    var saveProfileName by remember { mutableStateOf(initialProfileName) }
     var profileMessage by remember { mutableStateOf("") }
     var pendingDeleteProfile by remember { mutableStateOf<String?>(null) }
     val profiles = remember { mutableStateListOf<String>().apply { addAll(store.listProfiles()) } }
@@ -160,7 +162,7 @@ private fun TutIslandGuiContent(
                                 ProfileDropdownField(
                                     label = "Load Profile",
                                     value = selectedProfile,
-                                    options = (listOf("default") + profiles).distinct(),
+                                    options = (listOf(initialProfileName, "default") + profiles).distinct(),
                                     onSelected = { name ->
                                         val loaded = store.load(name)
                                         if (loaded != null) {

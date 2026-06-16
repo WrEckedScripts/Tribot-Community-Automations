@@ -12,6 +12,8 @@ plugins {
 // `implementation` transitively (so classes are on the compile classpath) AND packs
 // the classes into the consumer's fatJar at deploy time.
 tribot {
+    useScriptSdk = true
+    useLegacyApi = true
     useCompose = false
     useJavaFx = false
 }
