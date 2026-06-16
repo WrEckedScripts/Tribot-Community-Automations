@@ -44,6 +44,7 @@ include("player-mover")
 include("wr-tiara-crafter")
 
 include("tut-island")
+include("gem-stone-miner")
 
 // NOTE to contributors: add your own module here. See CONTRIBUTING.md for the full
 // walkthrough, but the short version is:

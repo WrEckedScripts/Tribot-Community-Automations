@@ -1,0 +1,7 @@
+{
+  "name": "CrazyDavy's Gem Stone Miner",
+  "description": "Mines Gem rocks at the selected upper or lower level.",
+  "categories": ["Mining"],
+  "version": "1.0.0",
+  "isCommunity": true
+}
