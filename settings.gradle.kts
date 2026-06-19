@@ -42,6 +42,7 @@ include("cam-torum-miner")
 // Community Scripts
 include("player-mover")
 include("wr-tiara-crafter")
+include("wr-defriender")
 
 include("tut-island")
 include("gem-stone-miner")
