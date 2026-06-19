@@ -1,5 +1,6 @@
 {
   "name": "WrBlastPumper",
+  "author": "WrEcked",
   "description": "Operates the Blast Furnace pump for AFK Strength experience",
   "categories": [
     "Combat"
