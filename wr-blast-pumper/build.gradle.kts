@@ -14,7 +14,7 @@ tribot {
             version = "1.0.0"
             author = "WrEcked"
             description = "Operates the Blast Furnace pump for AFK Strength experience"
-            category = "strength"
+            category = "combat"
         }
     }
 }

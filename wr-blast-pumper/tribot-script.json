@@ -1,0 +1,9 @@
+{
+  "name": "WrBlastPumper",
+  "description": "Operates the Blast Furnace pump for AFK Strength experience",
+  "categories": [
+    "Combat"
+  ],
+  "version": "1.0.0",
+  "isCommunity": true
+}
