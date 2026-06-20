@@ -14,7 +14,7 @@ tribot {
             version = "1.0.0"
             author = "WrEcked"
             description = "Removes every player from the account's friends list"
-            category = "utilities"
+            category = "tools"
         }
     }
 }
