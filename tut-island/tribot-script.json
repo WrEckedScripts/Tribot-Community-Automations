@@ -1,0 +1,7 @@
+{
+  "name": "CrazyDavy Tutorial Island",
+  "description": "Completes Tutorial Island for normal or ironman accounts and walks to a selected ending location.",
+  "categories": ["Tools"],
+  "version": "1.0.1",
+  "isCommunity": true
+}

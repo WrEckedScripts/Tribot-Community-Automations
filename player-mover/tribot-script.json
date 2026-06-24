@@ -1,0 +1,6 @@
+{
+  "name": "Player Mover",
+  "description": "Walks your player to any location on the map, then optionally logs out. Pass the destination as script arguments: location:x,y,plane (or x, y, and plane separately) plus logout:true|false. Example: location:3183,3440,0|logout:false walks to Varrock West Bank and stays logged in. Built and maintained by the Tribot Community and open source at https://github.com/TribotRS/Tribot-Community-Automations/tree/main/player-mover",
+  "categories": ["Tools"],
+  "version": "1.0.0"
+}

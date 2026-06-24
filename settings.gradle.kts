@@ -43,6 +43,10 @@ include("cam-torum-miner")
 // Community Scripts
 include("player-mover")
 include("wr-tiara-crafter")
+include("wr-defriender")
+
+include("tut-island")
+include("gem-stone-miner")
 include("wr-blast-pumper")
 
 // NOTE to contributors: add your own module here. See CONTRIBUTING.md for the full
