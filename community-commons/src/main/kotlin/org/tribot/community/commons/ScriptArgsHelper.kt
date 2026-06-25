@@ -1,5 +1,11 @@
 package org.tribot.community.commons
 
+import org.tribot.community.commons.ScriptArgsHelper.RAW_KEY
+import org.tribot.community.commons.ScriptArgsHelper.load
+import org.tribot.community.commons.ScriptArgsHelper.set
+import org.tribot.community.commons.ScriptArgsHelper.setAll
+
+
 /**
  * Stores and exposes the arguments supplied to a script.
  *
@@ -36,6 +42,13 @@ object ScriptArgsHelper {
             // Store as raw input
             args[RAW_KEY] = argString.trim()
         }
+    }
+
+    /**
+     * Returns a map containing all arguments.
+     */
+    fun getAll(): Map<String, String> {
+        return args
     }
 
     /**

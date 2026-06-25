@@ -9,7 +9,10 @@ import nullablelib.flow.BailException
 import nullablelib.paint.Colors
 import org.tribot.automation.TribotScript
 import org.tribot.automation.script.ScriptContext
+import org.tribot.community.commons.ScriptArgsHelper
 import org.tribot.script.sdk.util.TribotRandom
+import org.tribot.wrblastpumper.data.PumpWorld
+import org.tribot.wrblastpumper.tasks.HopWorld
 import org.tribot.wrblastpumper.tasks.OperatePumpTask
 import org.tribot.wrblastpumper.tasks.RefreshPumpTask
 import org.tribot.wrblastpumper.tasks.RefuelStoveTask
@@ -19,6 +22,11 @@ import org.tribot.wrscript.utilities.tasks.EnsureLoggedInTask
 import java.time.Duration
 import org.tribot.script.sdk.Waiting as SdkWaiting
 
+/**
+ * Supported arguments:
+ *  - world: int (optional, to run on a custom world)
+ *  - refuel: true|false (optional, defaults to true)
+ */
 class WrBlastPumper : TribotScript {
 
     private val refreshTimer = PumpRefreshTimer()
@@ -29,9 +37,11 @@ class WrBlastPumper : TribotScript {
 
         val stageResolver = PumperStageResolver(context)
         val ensureLoggedIn = EnsureLoggedInTask(context)
+        val hopWorld = HopWorld(context, PumpWorld.numbers, ScriptArgsHelper.get("world")?.toIntOrNull())
         val operatePump = OperatePumpTask()
         val refreshPump = RefreshPumpTask(operatePump)
         val refuelStove = RefuelStoveTask()
+
         var previousStage: PumperStage? = null
 
         context.logger.info("WrBlastPumper started")
@@ -53,11 +63,13 @@ class WrBlastPumper : TribotScript {
 
                     when (stage) {
                         PumperStage.LOGIN -> ensureLoggedIn.execute()
-//                        PumperStage.UNSUPPORTED_WORLD -> {
-//                            val worlds = PumpWorld.numbers.sorted().joinToString()
-//                            context.logger.error("Unsupported world: ${context.client.world}")
-//                            error("Start WrBlastPumper on one of these worlds: $worlds")
-//                        }
+                        PumperStage.UNSUPPORTED_WORLD -> {
+                            context.logger.error("Unsupported world detected: ${context.client.world} -> Looking to use a custom world? Supply the 'world:x' argument")
+
+                            if (!hopWorld.execute()) {
+                                error("Failed to world-hop")
+                            }
+                        }
 
                         PumperStage.FIND_PUMP -> {
                             TaskLabelTracker.label = "Searching for pump"
@@ -65,6 +77,11 @@ class WrBlastPumper : TribotScript {
                         }
 
                         PumperStage.REFUEL_STOVE -> {
+                            if (ScriptArgsHelper.getOrDefault("refuel", "true") == "false") {
+                                TaskLabelTracker.label = "Skipping and waiting on stove refuel"
+                                return
+                            }
+
                             if (refuelStove.execute()) {
                                 stoveRefuelTimer.clear()
                             }
@@ -124,6 +141,13 @@ class WrBlastPumper : TribotScript {
 
     private fun setup(context: ScriptContext) {
         NullableLib.init(context)
+        ScriptArgsHelper.load(context.runtime.scriptArgs)
+        context.logger.debug("WrBlastPumper arguments: ${context.runtime.scriptArgs}")
+
+        ScriptArgsHelper.getAll().forEach { (key, value) ->
+            context.logger.debug("$key=$value")
+        }
+
         installBlastFurnaceDebugListener(context)
 
         WrScriptHud(
@@ -149,7 +173,9 @@ class WrBlastPumper : TribotScript {
                     .filter { it in STOVE_OBJECT_IDS }
                     .toSet()
             }.orEmpty()
+
             val stoveIsLow = ObjectID.BLAST_FURNACE_STOVE_LOW in nearbyObjectIds
+            val stoveIsMedium = ObjectID.BLAST_FURNACE_STOVE_MEDIUM in nearbyObjectIds
             val stoveIsFull = ObjectID.BLAST_FURNACE_STOVE_FULL in nearbyObjectIds
 
             stoveRefuelTimer.observe(stoveIsLow, stoveIsFull)
@@ -158,7 +184,7 @@ class WrBlastPumper : TribotScript {
                 "Blast Furnace readings: " +
                         "fuelLow=${client.getVarbitValue(VarbitID.BLAST_FURNACE_FUEL_LOW_READING)}, " +
                         "stoveLow=$stoveIsLow, " +
-                        "stoveMedium=${ObjectID.BLAST_FURNACE_STOVE_MEDIUM in nearbyObjectIds}, " +
+                        "stoveMedium=$stoveIsMedium, " +
                         "stoveFull=$stoveIsFull"
             )
         }

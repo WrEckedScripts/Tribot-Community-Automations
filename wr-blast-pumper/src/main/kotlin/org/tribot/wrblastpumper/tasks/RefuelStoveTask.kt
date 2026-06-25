@@ -7,6 +7,7 @@ import nullablelib.antiban.sleepHotReaction
 import nullablelib.core.query.GroundItems
 import nullablelib.core.query.TileObjects
 import nullablelib.core.tabs.Inventory
+import org.tribot.community.commons.ScriptArgsHelper
 import org.tribot.script.sdk.Waiting
 import org.tribot.script.sdk.util.TribotRandom
 import org.tribot.wrscript.utilities.hud.TaskLabelTracker
@@ -16,6 +17,8 @@ class RefuelStoveTask : TaskContract {
     override val name = "Refueling stove"
 
     override fun perform(): Boolean {
+        if (ScriptArgsHelper.getOrDefault("refuel", "true") == "false") return true
+
         repeat(MAX_REFUEL_ATTEMPTS) {
             if (fullStove() != null) return true
 
@@ -68,10 +71,15 @@ class RefuelStoveTask : TaskContract {
             maxDistance = INTERACTION_DISTANCE,
         ) ?: return false
 
+        if (Inventory.isFull()) {
+            ctx.logger.error("Inventory is full, skipping spade grab")
+            return false
+        }
+
         if (!ctx.interaction.interact(spade, "Take")) return false
 
         return Waiting.waitUntil(5_000) {
-            ctx.logger.debug("Waiting for inventory to get a spade")
+            ctx.logger.debug("Waiting for inventory to register the spade")
             Inventory.contains(ItemID.SPADE)
         }
     }

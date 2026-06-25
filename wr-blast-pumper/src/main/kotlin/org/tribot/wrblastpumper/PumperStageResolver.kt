@@ -4,6 +4,7 @@ import net.runelite.api.gameval.ObjectID
 import nullablelib.core.query.TileObjects
 import org.tribot.automation.script.ScriptContext
 import org.tribot.wrblastpumper.data.BlastFurnaceObject
+import org.tribot.wrblastpumper.data.PumpWorld
 
 class PumperStageResolver(private val context: ScriptContext) {
     fun resolve(isRefreshDue: Boolean, isRefuelDue: Boolean): PumperStage =
@@ -27,7 +28,7 @@ class PumperStageResolver(private val context: ScriptContext) {
             isStoveRefillableNearby = TileObjects.closestWithId(
                 ObjectID.BLAST_FURNACE_STOVE_LOW,
                 ObjectID.BLAST_FURNACE_STOVE_MEDIUM,
-                maxDistance = 8,
+                maxDistance = 15,
             ) != null,
             isRefuelDue = isRefuelDue,
         )
@@ -36,14 +37,12 @@ class PumperStageResolver(private val context: ScriptContext) {
     companion object {
         internal fun resolve(state: PumperState): PumperStage {
             if (!state.isLoggedIn) return PumperStage.LOGIN
-
-            // To allow for custom worlds, below is disabled for the time being.
-//            if (state.world !in PumpWorld.numbers) return PumperStage.UNSUPPORTED_WORLD
-
+            if (state.world !in PumpWorld.numbers) return PumperStage.UNSUPPORTED_WORLD
             if (state.isRefuelDue && state.isStoveRefillableNearby) return PumperStage.REFUEL_STOVE
             if (state.isRefreshDue && state.isPumpNearby) return PumperStage.REFRESH_PUMP
             if (state.isPumping) return PumperStage.PUMPING
             if (state.isPumpNearby) return PumperStage.OPERATE_PUMP
+
             return PumperStage.FIND_PUMP
         }
     }
