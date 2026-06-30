@@ -83,7 +83,7 @@ class WrBlastPumper : TribotScript {
                         }
 
                         PumperStage.UNSUPPORTED_WORLD -> {
-                            context.logger.error("Unsupported world detected: ${context.client.world} -> Looking to use a custom world? Supply the 'world:x' argument")
+                            context.logger.error("Unsupported world detected: ${context.client.world} -> Hopping")
 
                             val hopped = SdkRetry.retry(3) {
                                 hopWorld.execute()
