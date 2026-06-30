@@ -3,6 +3,7 @@ package org.tribot.wrblastpumper.tasks
 import net.runelite.api.gameval.ItemID
 import net.runelite.api.gameval.ObjectID
 import nullablelib.NullableLib.ctx
+import nullablelib.antiban.sleepClickReaction
 import nullablelib.antiban.sleepHotReaction
 import nullablelib.core.query.GroundItems
 import nullablelib.core.query.TileObjects
@@ -19,22 +20,28 @@ class RefuelStoveTask : TaskContract {
     override fun perform(): Boolean {
         if (ScriptArgsHelper.getOrDefault("refuel", "true") == "false") return true
 
-        repeat(MAX_REFUEL_ATTEMPTS) {
+        val refuelAttempts = TribotRandom.uniform(MAX_REFUEL_ATTEMPTS, MAX_REFUEL_ATTEMPTS + 3)
+            .coerceAtLeast(MAX_REFUEL_ATTEMPTS)
+
+        repeat(refuelAttempts) {
             if (fullStove() != null) return true
 
             val stove = refillableStove() ?: return fullStove() != null
             if (!ensureCoke()) return false
 
             TaskLabelTracker.label = "Refueling stove"
-            if (!ctx.interaction.interact(stove, REFUEL_ACTION)) return false
+            if (!ctx.interaction.interact(stove, REFUEL_ACTION)) {
+                sleepClickReaction()
+                return false
+            }
 
             val previousStoveId = stove.id
-            val stoveChanged = Waiting.waitUntil(TribotRandom.uniform(750, 1_250)) {
+            val stoveChanged = Waiting.waitUntil(TribotRandom.uniform(750, 1_750)) {
                 ctx.logger.debug("Waiting for stove to change")
                 fullStove() != null || refillableStove()?.id != previousStoveId
             }
 
-            if (!stoveChanged) {
+            if (!stoveChanged && fullStove() == null) {
                 return false
             }
         }

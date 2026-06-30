@@ -5,7 +5,7 @@ plugins {
 
 tribot {
     useCompose = false
-    useJavaFx = false
+    useJavaFx = true
 
     scripts {
         register("wrblastpumper") {

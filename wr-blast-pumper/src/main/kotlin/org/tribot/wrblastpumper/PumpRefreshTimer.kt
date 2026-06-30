@@ -32,4 +32,8 @@ class PumpRefreshTimer internal constructor(
         nextRefreshAt?.let {
             Duration.ofMillis((it - currentTime()).coerceAtLeast(0))
         }
+
+    fun reset() {
+        nextRefreshAt = null
+    }
 }

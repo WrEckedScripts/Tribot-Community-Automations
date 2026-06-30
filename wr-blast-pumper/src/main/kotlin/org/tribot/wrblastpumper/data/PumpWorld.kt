@@ -14,6 +14,10 @@ enum class PumpWorld(val number: Int) {
             val defaultWorldNumbers = entries.mapTo(mutableSetOf()) { it.number }
             val customWorld = ScriptArgsHelper.get("world")?.toIntOrNull()
 
+            if (customWorld != null) {
+                return setOf(customWorld)
+            }
+
             return defaultWorldNumbers + listOfNotNull(customWorld)
         }
     }

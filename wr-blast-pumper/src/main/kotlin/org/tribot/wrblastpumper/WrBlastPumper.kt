@@ -1,9 +1,10 @@
 package org.tribot.wrblastpumper
 
 import net.runelite.api.*
+import net.runelite.api.gameval.ItemID
 import net.runelite.api.gameval.ObjectID
-import net.runelite.api.gameval.VarbitID
 import nullablelib.NullableLib
+import nullablelib.antiban.sleepHotReaction
 import nullablelib.core.tabs.Skills
 import nullablelib.flow.BailException
 import nullablelib.paint.Colors
@@ -11,7 +12,11 @@ import org.tribot.automation.TribotScript
 import org.tribot.automation.script.ScriptContext
 import org.tribot.community.commons.ScriptArgsHelper
 import org.tribot.script.sdk.util.TribotRandom
+import org.tribot.wrblastpumper.data.BlastFurnaceObject
 import org.tribot.wrblastpumper.data.PumpWorld
+import org.tribot.wrblastpumper.gui.PumperGui
+import org.tribot.wrblastpumper.gui.PumperProfileStore
+import org.tribot.wrblastpumper.gui.PumperSettings
 import org.tribot.wrblastpumper.tasks.HopWorld
 import org.tribot.wrblastpumper.tasks.OperatePumpTask
 import org.tribot.wrblastpumper.tasks.RefreshPumpTask
@@ -21,11 +26,14 @@ import org.tribot.wrscript.utilities.hud.WrScriptHud
 import org.tribot.wrscript.utilities.tasks.EnsureLoggedInTask
 import java.time.Duration
 import org.tribot.script.sdk.Waiting as SdkWaiting
+import org.tribot.script.sdk.util.Retry as SdkRetry
 
 /**
  * Supported arguments:
  *  - world: int (optional, to run on a custom world)
  *  - refuel: true|false (optional, defaults to true)
+ *  - profile: profile name (optional, loads the profile and bypasses the GUI)
+ *  - stopat: 1..99 (stops script at provided target strength level)
  */
 class WrBlastPumper : TribotScript {
 
@@ -33,10 +41,16 @@ class WrBlastPumper : TribotScript {
     private val stoveRefuelTimer = StoveRefuelTimer()
 
     override fun execute(context: ScriptContext) {
+        NullableLib.init(context)
+        ScriptArgsHelper.load(context.runtime.scriptArgs)
+
+        val profileStore = PumperProfileStore()
+        val settings = resolveSettings(context, profileStore) ?: return
+        settings.installAsArguments()
         setup(context)
 
         val stageResolver = PumperStageResolver(context)
-        val ensureLoggedIn = EnsureLoggedInTask(context)
+        val ensureLoggedIn = EnsureLoggedInTask(context, true)
         val hopWorld = HopWorld(context, PumpWorld.numbers, ScriptArgsHelper.get("world")?.toIntOrNull())
         val operatePump = OperatePumpTask()
         val refreshPump = RefreshPumpTask(operatePump)
@@ -47,6 +61,7 @@ class WrBlastPumper : TribotScript {
         context.logger.info("WrBlastPumper started")
 
         ensureHasRequirements()
+        ensureHasInventorySpots(context)
 
         try {
             while (true) {
@@ -62,18 +77,31 @@ class WrBlastPumper : TribotScript {
                     }
 
                     when (stage) {
-                        PumperStage.LOGIN -> ensureLoggedIn.execute()
+                        PumperStage.LOGIN -> {
+                            ensureLoggedIn.execute()
+                            refreshTimer.reset()
+                        }
+
                         PumperStage.UNSUPPORTED_WORLD -> {
                             context.logger.error("Unsupported world detected: ${context.client.world} -> Looking to use a custom world? Supply the 'world:x' argument")
 
-                            if (!hopWorld.execute()) {
-                                error("Failed to world-hop")
+                            val hopped = SdkRetry.retry(3) {
+                                hopWorld.execute()
+                            }
+
+                            if (!hopped) {
+                                error("Failed to world-hop in 3 attempts")
                             }
                         }
 
                         PumperStage.FIND_PUMP -> {
                             TaskLabelTracker.label = "Searching for pump"
-                            error("Pump not found. Start the script beside the Blast Furnace pump.")
+                            context.logger.error("Searching for pump")
+                            sleepHotReaction()
+
+                            if (!isInsideBlastFurnaceArea(context)) {
+                                error("We're not inside the Blast Furnace! Be sure to start the script there.")
+                            }
                         }
 
                         PumperStage.REFUEL_STOVE -> {
@@ -117,32 +145,45 @@ class WrBlastPumper : TribotScript {
         }
     }
 
-    private fun ensureHasRequirements() {
+    private fun ensureHasInventorySpots(context: ScriptContext) {
         if (!NullableLib.ctx.login.isLoggedIn()) {
             SdkWaiting.waitUntil(30_000) {
                 NullableLib.ctx.login.login() && NullableLib.ctx.login.isLoggedIn()
             }
+        }
 
-            // Validate if player has at least The Giant Dwarf quest started
-            val state = requireNotNull(NullableLib.ctx.clientThread.executeBlocking {
-                Quest.THE_GIANT_DWARF.getState(NullableLib.ctx.clientRaw)
-            })
+        val hasRegularSpade = context.inventory.contains(ItemID.SPADE)
+        val hasCokeSpade = context.inventory.contains(ItemID.BLAST_FURNACE_COKE_SPADE)
+        val hasAnySpade = hasRegularSpade || hasCokeSpade
 
-            if (state == QuestState.NOT_STARTED) {
-                throw Exception("You need to start The Giant Dwarf quest to use this script.")
-            }
+        if (!context.inventory.isFull() || hasAnySpade) {
+            context.logger.info("Inventory checked, we can start pumping!")
+            return
+        }
+    }
 
-            // And to facilitate stove maintenance, level 30 Firemaking is required
-            if (Skills.getLevel(Skill.FIREMAKING) < 30) {
-                throw Exception("You need to be level 30 Firemaking, to refuel the stove and thus to use this script.")
-            }
+    private fun ensureHasRequirements() {
+        if (!EnsureLoggedInTask(NullableLib.ctx, true).execute()) {
+            error("Failed to login")
+        }
+
+        // Validate if player has at least The Giant Dwarf quest started
+        val state = requireNotNull(NullableLib.ctx.clientThread.executeBlocking {
+            Quest.THE_GIANT_DWARF.getState(NullableLib.ctx.clientRaw)
+        })
+
+        if (state == QuestState.NOT_STARTED) {
+            throw Exception("You need to start The Giant Dwarf quest to use this script.")
+        }
+
+        // And to facilitate stove maintenance, level 30 Firemaking is required
+        if (Skills.getLevel(Skill.FIREMAKING) < 30 && ScriptArgsHelper.getOrDefault("refuel", "true") == "true") {
+            throw Exception("You need to be level 30 Firemaking, to refuel the stove and thus to use this script.")
         }
     }
 
     private fun setup(context: ScriptContext) {
-        NullableLib.init(context)
-        ScriptArgsHelper.load(context.runtime.scriptArgs)
-        context.logger.debug("WrBlastPumper arguments: ${context.runtime.scriptArgs}")
+        context.logger.debug("WrBlastPumper resolved arguments: ${ScriptArgsHelper.getAll()}")
 
         ScriptArgsHelper.getAll().forEach { (key, value) ->
             context.logger.debug("$key=$value")
@@ -160,6 +201,46 @@ class WrBlastPumper : TribotScript {
         }.row("Stove") {
             stoveRefuelTimer.getDueLabel()
         }.install()
+    }
+
+    private fun resolveSettings(
+        context: ScriptContext,
+        profileStore: PumperProfileStore,
+    ): PumperSettings? {
+        val suppliedArguments = ScriptArgsHelper.getAll().toMap()
+        val profileName = suppliedArguments["profile"]
+
+        if (profileName != null) {
+            val profile = profileStore.load(profileName)
+            if (profile == null) {
+                context.logger.error("WrBlastPumper profile not found: \"$profileName\"")
+                return null
+            }
+
+            val resolved = profile.withArgumentOverrides(suppliedArguments)
+            logInvalidArguments(context, resolved.invalidArguments)
+            context.logger.info("Loaded WrBlastPumper profile \"$profileName\"; bypassing GUI")
+            return resolved.settings
+        }
+
+        val initial = profileStore.load(PumperProfileStore.LAST_RUN_PROFILE)
+            ?: PumperSettings()
+        val resolved = initial.withArgumentOverrides(suppliedArguments)
+        logInvalidArguments(context, resolved.invalidArguments)
+
+        val settings = PumperGui(profileStore).showAndWait(resolved.settings)
+        if (settings == null) {
+            context.logger.info("WrBlastPumper GUI closed; stopping script")
+        }
+        return settings
+    }
+
+    private fun logInvalidArguments(context: ScriptContext, invalidArguments: List<String>) {
+        if (invalidArguments.isNotEmpty()) {
+            context.logger.warn(
+                "Ignoring invalid WrBlastPumper argument(s): ${invalidArguments.joinToString(", ")}",
+            )
+        }
     }
 
     private fun installBlastFurnaceDebugListener(context: ScriptContext) {
@@ -180,15 +261,18 @@ class WrBlastPumper : TribotScript {
 
             stoveRefuelTimer.observe(stoveIsLow, stoveIsFull)
 
-            context.logger.info(
-                "Blast Furnace readings: " +
-                        "fuelLow=${client.getVarbitValue(VarbitID.BLAST_FURNACE_FUEL_LOW_READING)}, " +
-                        "stoveLow=$stoveIsLow, " +
-                        "stoveMedium=$stoveIsMedium, " +
-                        "stoveFull=$stoveIsFull"
-            )
+//            context.logger.info(
+//                "Blast Furnace readings: " +
+//                        "fuelLow=${client.getVarbitValue(VarbitID.BLAST_FURNACE_FUEL_LOW_READING)}, " +
+//                        "stoveLow=$stoveIsLow, " +
+//                        "stoveMedium=$stoveIsMedium, " +
+//                        "stoveFull=$stoveIsFull"
+//            )
         }
     }
+
+    private fun isInsideBlastFurnaceArea(context: ScriptContext): Boolean =
+        BlastFurnaceObject.PUMP.area.contains(context.client.localPlayer.worldLocation)
 
     private fun tileObjects(tile: Tile): Sequence<TileObject> = sequence {
         tile.wallObject?.let { yield(it) }
