@@ -19,30 +19,32 @@ class HopWorld(
         get() = "Hopping world"
 
     override fun perform(): Boolean {
-        context.logger.debug("Hopping world to: ${resolveTargetWorld()}")
-        if (context.client.world == targetWorld) return true
+        val resolvedTargetWorld = resolveTargetWorld()
+
+        context.logger.debug("Hopping world to: $resolvedTargetWorld")
+        if (context.client.world == resolvedTargetWorld) return true
         if (context.client.world in acceptedWorlds) return true
 
-        TaskLabelTracker.label = "Hopping world to: $targetWorld"
+        TaskLabelTracker.label = "Hopping world to: $resolvedTargetWorld"
         sleepHotReaction()
 
         context.client.openWorldHopper()
         sleepClickReaction()
 
         try {
-            val world = context.client.worldList.first { it.id == resolveTargetWorld() }
+            val world = context.client.worldList.first { it.id == resolvedTargetWorld }
             context.client.hopToWorld(world)
         } catch (e: Exception) {
             // In case the worldList hasn't fully loaded yet (saw some must not be null errors when hopping)
             // - without calling the openWorldHopper before that is, so might be related.
             // - - Since we actually don't seem to open the UI anyway. and just hop via the RL plugin / builtin commands I'd say?
-            context.logger.error("Failed to hop to world: $targetWorld", e)
+            context.logger.error("Failed to hop to world: $resolvedTargetWorld", e)
             sleepClickReaction()
             return false
         }
 
         return SdkWaiting.waitUntil(timeout, stepTimeout) {
-            context.client.world in acceptedWorlds && context.client.world == targetWorld && context.login.isLoggedIn() && !context.login.isOnWelcomeScreen()
+            context.client.world == resolvedTargetWorld && context.login.isLoggedIn() && !context.login.isOnWelcomeScreen()
         }
     }
 
