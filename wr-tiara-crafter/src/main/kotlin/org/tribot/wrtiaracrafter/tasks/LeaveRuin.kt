@@ -5,7 +5,7 @@ import nullablelib.antiban.sleepHotReaction
 import nullablelib.core.definition.Definitions
 import nullablelib.core.input.interact
 import nullablelib.core.query.TileObjects
-import org.tribot.wrtiaracrafter.contracts.TaskContract
+import org.tribot.wrscript.utilities.tasks.TaskContract
 import org.tribot.wrtiaracrafter.data.Altars
 import org.tribot.script.sdk.Waiting as SdkWaiting
 

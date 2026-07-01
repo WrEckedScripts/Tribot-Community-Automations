@@ -33,6 +33,7 @@ rootProject.name = "tribot-community-scripts"
 // Shared libraries — contributed utilities that other modules depend on via
 // `bundled(project(":community-commons"))`.
 include("community-commons")
+include("wrscript-utilities")
 
 // Starter templates — copy any of these as a starting point for a new contribution.
 // Keep them small, well-commented, and guaranteed to compile against the current SDK.
@@ -46,6 +47,7 @@ include("wr-defriender")
 
 include("tut-island")
 include("gem-stone-miner")
+include("wr-blast-pumper")
 
 // NOTE to contributors: add your own module here. See CONTRIBUTING.md for the full
 // walkthrough, but the short version is:

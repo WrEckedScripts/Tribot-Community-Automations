@@ -1,6 +1,6 @@
-package org.tribot.wrtiaracrafter.contracts
+package org.tribot.wrscript.utilities.tasks
 
-import org.tribot.wrtiaracrafter.hud.TaskLabelTracker
+import org.tribot.wrscript.utilities.hud.TaskLabelTracker
 
 interface TaskContract {
     val name: String

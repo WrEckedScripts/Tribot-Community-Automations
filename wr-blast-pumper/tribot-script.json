@@ -1,0 +1,10 @@
+{
+  "name": "WrBlastPumper",
+  "author": "WrEcked",
+  "description": "Operates the Blast Furnace pump for AFK Strength experience\nFeatures:\n - Refueling the stove (refuel:false to disable this)\n - Custom world (world:X to support your world)",
+  "categories": [
+    "Combat"
+  ],
+  "version": "1.0.0",
+  "isCommunity": true
+}

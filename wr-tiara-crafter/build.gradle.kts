@@ -21,5 +21,6 @@ tribot {
 
 dependencies {
     bundled(project(":community-commons"))
+    bundled(project(":wrscript-utilities"))
     bundled("com.github.Nullable-TB:nullable-lib:latest.release")
 }

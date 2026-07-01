@@ -8,8 +8,8 @@ import nullablelib.core.tabs.Inventory
 import nullablelib.core.widgets.Banking
 import org.tribot.community.commons.BankingHelpers
 import org.tribot.script.sdk.util.TribotRandom
+import org.tribot.wrscript.utilities.tasks.TaskContract
 import org.tribot.wrtiaracrafter.antiban.BreaksHelper
-import org.tribot.wrtiaracrafter.contracts.TaskContract
 import org.tribot.wrtiaracrafter.data.Altars
 import org.tribot.wrtiaracrafter.data.Banks
 
